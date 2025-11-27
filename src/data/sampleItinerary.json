@@ -1,0 +1,351 @@
+{
+  "trip": {
+    "id": "paris_2024_spring",
+    "title": "Spring in Paris",
+    "destination": "Paris, France",
+    "startDate": "2024-04-15",
+    "endDate": "2024-04-22",
+    "description": "A romantic week in the city of lights, exploring art, culture, and cuisine.",
+    "coverImage": "https://example.com/paris-cover.jpg"
+  },
+  "itinerary": [
+    {
+      "day": 1,
+      "date": "2024-04-15",
+      "activities": [
+        {
+          "id": 1,
+          "time": "14:00",
+          "title": "Arrival & Check-in",
+          "location": "Hotel Le Marais",
+          "description": "Check-in at the hotel and freshen up.",
+          "category": "accommodation",
+          "notes": "Early check-in requested. Hotel contact: +33 1 23 45 67 89"
+        },
+        {
+          "id": 2,
+          "time": "16:00",
+          "title": "Seine River Cruise",
+          "location": "Bateaux Parisiens, Port de la Bourdonnais",
+          "description": "Relaxing cruise along the Seine River to see major landmarks.",
+          "category": "sightseeing",
+          "notes": "Tickets booked for 4 PM. Confirmation #PC12345"
+        },
+        {
+          "id": 3,
+          "time": "20:00",
+          "title": "Welcome Dinner",
+          "location": "Le Jules Verne, Eiffel Tower",
+          "description": "Fine dining with a view of Paris from the Eiffel Tower.",
+          "category": "food",
+          "notes": "Reservation under Smith, 8 PM. Smart casual dress code."
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2024-04-16",
+      "activities": [
+        {
+          "id": 4,
+          "time": "09:00",
+          "title": "Louvre Museum",
+          "location": "Rue de Rivoli",
+          "description": "Explore the world's largest art museum, home to the Mona Lisa.",
+          "category": "sightseeing",
+          "notes": "Skip-the-line tickets for 9 AM. Audio guide available."
+        },
+        {
+          "id": 5,
+          "time": "13:00",
+          "title": "Lunch in Le Marais",
+          "location": "L'As du Fallafel, Rue des Rosiers",
+          "description": "Famous falafel spot in the historic Jewish quarter.",
+          "category": "food",
+          "notes": "Cash only. Try the special falafel pita."
+        },
+        {
+          "id": 6,
+          "time": "15:00",
+          "title": "Notre-Dame & Île de la Cité",
+          "location": "Notre-Dame Cathedral",
+          "description": "Visit the iconic cathedral and explore the historic island.",
+          "category": "sightseeing",
+          "notes": "Check for any post-restoration visiting hours."
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2024-04-17",
+      "activities": [
+        {
+          "id": 7,
+          "time": "10:00",
+          "title": "Day Trip to Versailles",
+          "location": "Palace of Versailles",
+          "description": "Full day exploring the opulent palace and gardens.",
+          "category": "daytrip",
+          "notes": "Train from Paris Montparnasse at 8:30 AM. Pack comfortable shoes."
+        }
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2024-04-18",
+      "activities": [
+        {
+          "id": 8,
+          "time": "09:30",
+          "title": "Eiffel Tower Summit",
+          "location": "Champ de Mars",
+          "description": "Early morning visit to the top of the Eiffel Tower.",
+          "category": "sightseeing",
+          "notes": "Tickets for 9:30 AM summit access. Arrive 30 mins early for security."
+        },
+        {
+          "id": 9,
+          "time": "14:00",
+          "title": "Musée d'Orsay",
+          "location": "1 Rue de la Légion d'Honneur",
+          "description": "Impressionist masterpieces in a beautiful former train station.",
+          "category": "sightseeing",
+          "notes": "Tickets for 2 PM. Don't miss the Van Gogh collection."
+        }
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2024-04-19",
+      "activities": [
+        {
+          "id": 10,
+          "time": "10:00",
+          "title": "Montmartre Walking Tour",
+          "location": "Meeting at Blanche Metro Station",
+          "description": "Explore the artistic neighborhood, Sacré-Cœur, and Place du Tertre.",
+          "category": "walking",
+          "notes": "Wear comfortable shoes. Tour lasts 2.5 hours."
+        },
+        {
+          "id": 11,
+          "time": "19:30",
+          "title": "Moulin Rouge Show",
+          "location": "82 Boulevard de Clichy",
+          "description": "Evening show at the world-famous cabaret.",
+          "category": "entertainment",
+          "notes": "Dress code: Elegant attire. Show starts at 9 PM, dinner at 7:30 PM."
+        }
+      ]
+    },
+    {
+      "day": 6,
+      "date": "2024-04-20",
+      "activities": [
+        {
+          "id": 12,
+          "time": "11:00",
+          "title": "Shopping in Champs-Élysées",
+          "location": "Avenue des Champs-Élysées",
+          "description": "Luxury shopping and iconic Parisian stores.",
+          "category": "shopping",
+          "notes": "Visit Ladurée for macarons. Consider tax-free shopping options."
+        },
+        {
+          "id": 13,
+          "time": "15:00",
+          "title": "Arc de Triomphe",
+          "location": "Place Charles de Gaulle",
+          "description": "Climb to the top for panoramic views of Paris.",
+          "category": "sightseeing",
+          "notes": "284 steps to the top. Included in Paris Museum Pass."
+        }
+      ]
+    },
+    {
+      "day": 7,
+      "date": "2024-04-21",
+      "activities": [
+        {
+          "id": 14,
+          "time": "10:00",
+          "title": "Day Trip to Giverny",
+          "location": "Monet's Garden",
+          "description": "Visit Claude Monet's house and famous water lily gardens.",
+          "category": "daytrip",
+          "notes": "Train from Gare Saint-Lazare. Pack a picnic lunch."
+        }
+      ]
+    },
+    {
+      "day": 8,
+      "date": "2024-04-22",
+      "activities": [
+        {
+          "id": 15,
+          "time": "10:00",
+          "title": "Luxembourg Gardens",
+          "location": "Rue de Médicis",
+          "description": "Relaxing morning in the beautiful gardens before departure.",
+          "category": "leisure",
+          "notes": "Perfect spot for people watching and a final Parisian coffee."
+        },
+        {
+          "id": 16,
+          "time": "14:00",
+          "title": "Airport Transfer",
+          "location": "Charles de Gaulle Airport",
+          "description": "Private transfer to the airport for return flight.",
+          "category": "transport",
+          "notes": "Pickup at hotel at 2 PM. Flight at 5:30 PM."
+        }
+      ]
+    }
+  ],
+  "accommodation": {
+    "name": "Hotel Le Marais",
+    "address": "2 Rue de la Verrerie, 75004 Paris, France",
+    "checkIn": "2024-04-15T14:00:00",
+    "checkOut": "2024-04-22T12:00:00",
+    "confirmation": "RES12345678",
+    "phone": "+33 1 23 45 67 89",
+    "notes": "Located in the heart of Le Marais, close to metro stations."
+  },
+  "transportation": [
+    {
+      "type": "flight",
+      "departure": {
+        "location": "JFK Airport, New York",
+        "dateTime": "2024-04-14T20:30:00"
+      },
+      "arrival": {
+        "location": "Charles de Gaulle Airport, Paris",
+        "dateTime": "2024-04-15T09:45:00"
+      },
+      "confirmation": "ABC123",
+      "airline": "Air France",
+      "flightNumber": "AF123"
+    },
+    {
+      "type": "flight",
+      "departure": {
+        "location": "Charles de Gaulle Airport, Paris",
+        "dateTime": "2024-04-22T17:30:00"
+      },
+      "arrival": {
+        "location": "JFK Airport, New York",
+        "dateTime": "2024-04-22T20:15:00"
+      },
+      "confirmation": "ABC124",
+      "airline": "Air France",
+      "flightNumber": "AF124"
+    },
+    {
+      "type": "train",
+      "departure": {
+        "location": "Paris Montparnasse",
+        "dateTime": "2024-04-17T08:30:00"
+      },
+      "arrival": {
+        "location": "Versailles Château Rive Gauche",
+        "dateTime": "2024-04-17T09:00:00"
+      },
+      "confirmation": "TER12345",
+      "notes": "Round-trip tickets purchased. 10-minute walk to palace from station."
+    }
+  ],
+  "expenses": [
+    {
+      "id": 1,
+      "date": "2024-04-14",
+      "description": "Roundtrip Flight NYC-Paris",
+      "category": "transport",
+      "amount": 1200,
+      "currency": "USD",
+      "notes": "Paid with credit card, 2x points on travel"
+    },
+    {
+      "id": 2,
+      "date": "2024-04-15",
+      "description": "Hotel Deposit (3 nights)",
+      "category": "accommodation",
+      "amount": 900,
+      "currency": "EUR",
+      "notes": "Remaining balance due at check-out"
+    },
+    {
+      "id": 3,
+      "date": "2024-04-15",
+      "description": "Dinner at Le Jules Verne",
+      "category": "food",
+      "amount": 350,
+      "currency": "EUR",
+      "notes": "Tasting menu with wine pairing"
+    },
+    {
+      "id": 4,
+      "date": "2024-04-16",
+      "description": "Louvre Tickets",
+      "category": "activities",
+      "amount": 34,
+      "currency": "EUR",
+      "notes": "2x Skip-the-line tickets"
+    },
+    {
+      "id": 5,
+      "date": "2024-04-16",
+      "description": "Lunch in Le Marais",
+      "category": "food",
+      "amount": 25,
+      "currency": "EUR",
+      "notes": "Falafel and drinks"
+    },
+    {
+      "id": 6,
+      "date": "2024-04-17",
+      "description": "Versailles Day Trip",
+      "category": "activities",
+      "amount": 120,
+      "currency": "EUR",
+      "notes": "Train tickets + Palace entry + Audio guides"
+    },
+    {
+      "id": 7,
+      "date": "2024-04-19",
+      "description": "Moulin Rouge Show",
+      "category": "entertainment",
+      "amount": 280,
+      "currency": "EUR",
+      "notes": "2x tickets with dinner"
+    },
+    {
+      "id": 8,
+      "date": "2024-04-21",
+      "description": "Giverny Day Trip",
+      "category": "activities",
+      "amount": 85,
+      "currency": "EUR",
+      "notes": "Train tickets + Garden entry"
+    }
+  ],
+  "notes": [
+    {
+      "id": 1,
+      "title": "Emergency Contacts",
+      "content": "US Embassy: +33 1 43 12 22 22\nLocal Emergency: 112\nTravel Insurance: +1-800-123-4567 (Policy #T123456789)",
+      "category": "important"
+    },
+    {
+      "id": 2,
+      "title": "Local Customs",
+      "content": "- Always greet with \"Bonjour\" before starting a conversation\n- Tipping is usually included in the bill (service compris)\n- Keep small change for public restrooms\n- Learn basic French phrases",
+      "category": "tips"
+    },
+    {
+      "id": 3,
+      "title": "Packing List",
+      "content": "- Comfortable walking shoes\n- Umbrella or rain jacket\n- Universal power adapter\n- Copies of important documents\n- Medications and prescriptions\n- Reusable water bottle",
+      "category": "preparation"
+    }
+  ]
+}

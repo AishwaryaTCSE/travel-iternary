@@ -1,0 +1,102 @@
+{
+  "recommendations": [
+    {
+      "id": 1,
+      "destination": "Paris, France",
+      "type": "city",
+      "highlights": [
+        "Eiffel Tower",
+        "Louvre Museum",
+        "Notre-Dame Cathedral",
+        "Montmartre"
+      ],
+      "bestTimeToVisit": "April to June, September to October",
+      "budgetLevel": 4,
+      "tags": ["romantic", "museums", "food", "history"]
+    },
+    {
+      "id": 2,
+      "destination": "Bali, Indonesia",
+      "type": "island",
+      "highlights": [
+        "Ubud Monkey Forest",
+        "Tegallalang Rice Terraces",
+        "Uluwatu Temple",
+        "Nusa Penida"
+      ],
+      "bestTimeToVisit": "April to October",
+      "budgetLevel": 3,
+      "tags": ["beach", "adventure", "spiritual", "nature"]
+    },
+    {
+      "id": 3,
+      "destination": "Kyoto, Japan",
+      "type": "city",
+      "highlights": [
+        "Fushimi Inari Shrine",
+        "Kinkaku-ji (Golden Pavilion)",
+        "Arashiyama Bamboo Forest",
+        "Gion District"
+      ],
+      "bestTimeToVisit": "March to May (cherry blossoms), October to November (fall foliage)",
+      "budgetLevel": 4,
+      "tags": ["culture", "history", "temples", "gardens"]
+    },
+    {
+      "id": 4,
+      "destination": "Santorini, Greece",
+      "type": "island",
+      "highlights": [
+        "Oia Sunset Views",
+        "Red Beach",
+        "Ancient Thera",
+        "Santorini Wineries"
+      ],
+      "bestTimeToVisit": "May to October",
+      "budgetLevel": 5,
+      "tags": ["romantic", "beach", "photography", "luxury"]
+    },
+    {
+      "id": 5,
+      "destination": "New York City, USA",
+      "type": "city",
+      "highlights": [
+        "Statue of Liberty",
+        "Central Park",
+        "Times Square",
+        "Metropolitan Museum of Art"
+      ],
+      "bestTimeToVisit": "April to June, September to November",
+      "budgetLevel": 5,
+      "tags": ["shopping", "museums", "food", "theater"]
+    },
+    {
+      "id": 6,
+      "destination": "Cape Town, South Africa",
+      "type": "city",
+      "highlights": [
+        "Table Mountain",
+        "Cape of Good Hope",
+        "Robben Island",
+        "Kirstenbosch National Botanical Garden"
+      ],
+      "bestTimeToVisit": "March to May, September to November",
+      "budgetLevel": 3,
+      "tags": ["adventure", "wildlife", "scenic", "wine"]
+    },
+    {
+      "id": 7,
+      "destination": "Queenstown, New Zealand",
+      "type": "adventure",
+      "highlights": [
+        "Bungee Jumping",
+        "Milford Sound",
+        "Skiing in The Remarkables",
+        "Queenstown Gardens"
+      ],
+      "bestTimeToVisit": "December to February (summer), June to August (winter sports)",
+      "budgetLevel": 4,
+      "tags": ["adventure", "nature", "hiking", "winter sports"]
+    }
+  ]
+}

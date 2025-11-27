@@ -1,0 +1,144 @@
+{
+  "cities": [
+    {
+      "id": 1,
+      "name": "New York",
+      "country": "US",
+      "forecast": [
+        {
+          "date": "2023-11-26",
+          "temp_max": 12,
+          "temp_min": 5,
+          "condition": "Partly Cloudy",
+          "icon": "partly-cloudy-day"
+        },
+        {
+          "date": "2023-11-27",
+          "temp_max": 10,
+          "temp_min": 3,
+          "condition": "Rain",
+          "icon": "rain"
+        },
+        {
+          "date": "2023-11-28",
+          "temp_max": 8,
+          "temp_min": 1,
+          "condition": "Snow",
+          "icon": "snow"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "London",
+      "country": "GB",
+      "forecast": [
+        {
+          "date": "2023-11-26",
+          "temp_max": 9,
+          "temp_min": 4,
+          "condition": "Cloudy",
+          "icon": "cloudy"
+        },
+        {
+          "date": "2023-11-27",
+          "temp_max": 10,
+          "temp_min": 6,
+          "condition": "Rain",
+          "icon": "rain"
+        },
+        {
+          "date": "2023-11-28",
+          "temp_max": 11,
+          "temp_min": 7,
+          "condition": "Partly Cloudy",
+          "icon": "partly-cloudy-day"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Tokyo",
+      "country": "JP",
+      "forecast": [
+        {
+          "date": "2023-11-26",
+          "temp_max": 18,
+          "temp_min": 12,
+          "condition": "Sunny",
+          "icon": "clear-day"
+        },
+        {
+          "date": "2023-11-27",
+          "temp_max": 16,
+          "temp_min": 11,
+          "condition": "Partly Cloudy",
+          "icon": "partly-cloudy-day"
+        },
+        {
+          "date": "2023-11-28",
+          "temp_max": 14,
+          "temp_min": 9,
+          "condition": "Rain",
+          "icon": "rain"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Sydney",
+      "country": "AU",
+      "forecast": [
+        {
+          "date": "2023-11-26",
+          "temp_max": 28,
+          "temp_min": 19,
+          "condition": "Sunny",
+          "icon": "clear-day"
+        },
+        {
+          "date": "2023-11-27",
+          "temp_max": 30,
+          "temp_min": 20,
+          "condition": "Sunny",
+          "icon": "clear-day"
+        },
+        {
+          "date": "2023-11-28",
+          "temp_max": 27,
+          "temp_min": 18,
+          "condition": "Partly Cloudy",
+          "icon": "partly-cloudy-day"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Mumbai",
+      "country": "IN",
+      "forecast": [
+        {
+          "date": "2023-11-26",
+          "temp_max": 32,
+          "temp_min": 24,
+          "condition": "Partly Cloudy",
+          "icon": "partly-cloudy-day"
+        },
+        {
+          "date": "2023-11-27",
+          "temp_max": 31,
+          "temp_min": 25,
+          "condition": "Rain",
+          "icon": "rain"
+        },
+        {
+          "date": "2023-11-28",
+          "temp_max": 30,
+          "temp_min": 24,
+          "condition": "Thunderstorm",
+          "icon": "thunderstorm"
+        }
+      ]
+    }
+  ]
+}

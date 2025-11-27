@@ -1,0 +1,127 @@
+{
+  "app": {
+    "title": "பயண திட்டமிடல் செயலி",
+    "subtitle": "உங்கள் சிறந்த பயணத்தை திட்டமிடுங்கள்",
+    "loading": "ஏற்றுகிறது...",
+    "error": "ஒரு பிழை ஏற்பட்டது",
+    "success": "வெற்றி!",
+    "save": "சேமி",
+    "cancel": "ரத்து செய்",
+    "delete": "நீக்கு",
+    "edit": "திருத்து",
+    "view": "காண்க",
+    "add": "சேர்",
+    "search": "தேடு",
+    "close": "மூடு",
+    "back": "பின் செல்",
+    "next": "அடுத்து",
+    "previous": "முந்தைய",
+    "submit": "சமர்ப்பி",
+    "reset": "மீட்டமை",
+    "confirm": "உறுதி செய்",
+    "selectLanguage": "மொழியைத் தேர்ந்தெடு"
+  },
+  "navigation": {
+    "home": "முகப்பு",
+    "itinerary": "பயணத் திட்டம்",
+    "expenses": "செலவுகள்",
+    "packing": "பேக்கிங் பட்டியல்",
+    "map": "வரைபடம்",
+    "weather": "வானிலை",
+    "documents": "ஆவணங்கள்",
+    "settings": "அமைப்புகள்"
+  },
+  "trip": {
+    "createTrip": "புதிய பயணத்தை உருவாக்கு",
+    "tripName": "பயணத்தின் பெயர்",
+    "destination": "இலக்கு இடம்",
+    "startDate": "தொடக்க தேதி",
+    "endDate": "முடிவு தேதி",
+    "description": "விளக்கம்",
+    "noTrips": "பயணங்கள் எதுவும் கிடைக்கவில்லை. உங்கள் முதல் பயணத்தை உருவாக்கவும்!",
+    "deleteConfirm": "இந்த பயணத்தை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+    "days": "{{count}} நாள்",
+    "days_plural": "{{count}} நாட்கள்"
+  },
+  "itinerary": {
+    "addActivity": "செயல்பாட்டைச் சேர்",
+    "activityName": "செயல்பாட்டின் பெயர்",
+    "location": "இடம்",
+    "date": "தேதி",
+    "time": "நேரம்",
+    "duration": "கால அளவு",
+    "category": "வகை",
+    "notes": "குறிப்புகள்",
+    "noActivities": "இந்த நாளுக்கு எந்த செயல்பாடுகளும் திட்டமிடப்படவில்லை.",
+    "transport": "போக்குவரத்து",
+    "accommodation": "தங்குமிடம்",
+    "food": "உணவு",
+    "sightseeing": "பார்வை இடங்கள்",
+    "other": "மற்றவை"
+  },
+  "expenses": {
+    "addExpense": "செலவைச் சேர்",
+    "expenseName": "செலவின் பெயர்",
+    "amount": "தொகை",
+    "category": "வகை",
+    "date": "தேதி",
+    "currency": "நாணயம்",
+    "total": "மொத்தம்",
+    "budget": "நிதி ஒதுக்கீடு",
+    "remaining": "மீதம் உள்ளது",
+    "spent": "செலவழிக்கப்பட்டது",
+    "categories": {
+      "transport": "போக்குவரத்து",
+      "accommodation": "தங்குமிடம்",
+      "food": "உணவு",
+      "activities": "செயல்பாடுகள்",
+      "shopping": "கடைசெலவு",
+      "other": "மற்றவை"
+    }
+  },
+  "packing": {
+    "addItem": "உருப்படியைச் சேர்",
+    "itemName": "உருப்படியின் பெயர்",
+    "category": "வகை",
+    "quantity": "அளவு",
+    "packed": "பேக் செய்யப்பட்டது",
+    "categories": {
+      "clothing": "ஆடைகள்",
+      "toiletries": "குளியல் சாதனங்கள்",
+      "electronics": "மின்னணு பொருட்கள்",
+      "documents": "ஆவணங்கள்",
+      "accessories": "துணைப்பொருட்கள்",
+      "other": "மற்றவை"
+    }
+  },
+  "weather": {
+    "forecast": "வானிலை முன்னறிவிப்பு",
+    "current": "தற்போதைய வானிலை",
+    "high": "அதிகபட்சம்",
+    "low": "குறைந்தபட்சம்",
+    "humidity": "ஈரப்பதம்",
+    "wind": "காற்று",
+    "precipitation": "மழைப்பொழிவு"
+  },
+  "documents": {
+    "upload": "ஆவணத்தை பதிவேற்று",
+    "noDocuments": "இதுவரை எந்த ஆவணங்களும் பதிவேற்றப்படவில்லை.",
+    "types": {
+      "passport": "பாஸ்போர்ட்",
+      "visa": "விசா",
+      "tickets": "டிக்கெட்கள்",
+      "reservations": "முன்பதிவுகள்",
+      "other": "மற்றவை"
+    }
+  },
+  "settings": {
+    "language": "மொழி",
+    "theme": "தீம்",
+    "darkMode": "இருண்ட முறை",
+    "notifications": "அறிவிப்புகள்",
+    "currency": "இயல்புநிலை நாணயம்",
+    "temperature": "வெப்பநிலை அலகு",
+    "celsius": "செல்சியஸ்",
+    "fahrenheit": "பாரன்ஹீட்"
+  }
+}

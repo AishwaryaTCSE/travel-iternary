@@ -1,0 +1,129 @@
+{
+  "app": {
+    "title": "ప్రయాణ ప్రణాళికా సహాయకుడు",
+    "subtitle": "మీ ఖచ్చితమైన ప్రయాణాన్ని ప్లాన్ చేయండి",
+    "loading": "లోడ్ అవుతోంది...",
+    "error": "ఒక లోపం సంభవించింది",
+    "success": "విజయవంతమైనది!",
+    "save": "సేవ్ చేయి",
+    "cancel": "రద్దు చేయి",
+    "delete": "తొలగించు",
+    "edit": "సవరించు",
+    "view": "చూడండి",
+    "add": "చేర్చు",
+    "search": "వెతకండి",
+    "close": "మూసివేయి",
+    "back": "వెనుకకు",
+    "next": "తర్వాతి",
+    "previous": "మునుపటి",
+    "submit": "సమర్పించండి",
+    "reset": "రీసెట్ చేయి",
+    "confirm": "నిర్ధారించండి",
+    "selectLanguage": "భాషను ఎంచుకోండి"
+  },
+  "navigation": {
+    "home": "హోమ్",
+    "itinerary": "ప్రయాణ ప్రణాళిక",
+    "expenses": "ఖర్చులు",
+    "packing": "ప్యాకింగ్ జాబితా",
+    "map": "మ్యాప్",
+    "weather": "వాతావరణం",
+    "documents": "పత్రాలు",
+    "settings": "సెట్టింగులు"
+  },
+  "trip": {
+    "createTrip": "కొత్త ప్రయాణాన్ని సృష్టించండి",
+    "tripName": "ప్రయాణం పేరు",
+    "destination": "గమ్యస్థానం",
+    "startDate": "ప్రారంభ తేదీ",
+    "endDate": "ముగింపు తేదీ",
+    "description": "వివరణ",
+    "noTrips": "ప్రయాణాలు ఏవీ కనుగొనబడలేదు. మీ మొదటి ప్రయాణాన్ని సృష్టించండి!",
+    "deleteConfirm": "మీరు ఖచ్చితంగా ఈ ప్రయాణాన్ని తొలగించాలనుకుంటున్నారా?",
+    "days": "{{count}} రోజు",
+    "days_plural": "{{count}} రోజులు"
+  },
+  "itinerary": {
+    "addActivity": "కార్యకలాపం జోడించండి",
+    "activityName": "కార్యకలాపం పేరు",
+    "location": "స్థానం",
+    "date": "తేదీ",
+    "time": "సమయం",
+    "duration": "కాలవ్యవధి",
+    "category": "వర్గం",
+    "notes": "గమనికలు",
+    "noActivities": "ఈ రోజుకు ఏ కార్యకలాపాలు ప్లాన్ చేయబడలేదు.",
+    "transport": "రవాణా",
+    "accommodation": "వసతి",
+    "food": "ఆహారం",
+    "sightseeing": "చూడాల్సిన ప్రదేశాలు",
+    "other": "ఇతర"
+  },
+  "expenses": {
+    "addExpense": "ఖర్చును జోడించండి",
+    "expenseName": "ఖర్చు పేరు",
+    "amount": "మొత్తం",
+    "category": "వర్గం",
+    "date": "తేదీ",
+    "currency": "కరెన్సీ",
+    "total": "మొత్తం",
+    "budget": "బడ్జెట్",
+    "remaining": "మిగిలినది",
+    "spent": "ఖర్చు చేయబడింది",
+    "categories": {
+      "transport": "రవాణా",
+      "accommodation": "వసతి",
+      "food": "ఆహారం",
+      "activities": "కార్యకలాపాలు",
+      "shopping": "షాపింగ్",
+      "other": "ఇతర"
+    }
+  },
+  "packing": {
+    "addItem": "ఐటెమ్ జోడించండి",
+    "itemName": "ఐటెమ్ పేరు",
+    "category": "వర్గం",
+    "quantity": "పరిమాణం",
+    "packed": "ప్యాక్ చేయబడింది",
+    "categories": {
+      "clothing": "బట్టలు",
+      "toiletries": "టాయిలెట్రీస్",
+      "electronics": "ఎలక్ట్రానిక్స్",
+      "documents": "డాక్యుమెంట్స్",
+      "accessories": "ఆక్సెసరీస్",
+      "other": "ఇతర"
+    }
+  },
+  "weather": {
+    "forecast": "వాతావరణ సూచన",
+    "current": "ప్రస్తుత వాతావరణం",
+    "high": "అత్యధిక ఉష్ణోగ్రత",
+    "low": "కనిష్ట ఉష్ణోగ్రత",
+    "humidity": "తేమ",
+    "wind": "గాలి",
+    "sunrise": "సూర్యోదయం",
+    "sunset": "సూర్యాస్తమయం",
+    "precipitation": "వర్షపాతం"
+  },
+  "documents": {
+    "upload": "డాక్యుమెంట్ అప్లోడ్ చేయండి",
+    "noDocuments": "ఇంకా ఏ డాక్యుమెంట్లు అప్లోడ్ చేయబడలేదు.",
+    "types": {
+      "passport": "పాస్పోర్ట్",
+      "visa": "వీసా",
+      "tickets": "టిక్కెట్లు",
+      "reservations": "రిజర్వేషన్లు",
+      "other": "ఇతర"
+    }
+  },
+  "settings": {
+    "language": "భాష",
+    "theme": "థీమ్",
+    "darkMode": "డార్క్ మోడ్",
+    "notifications": "నోటిఫికేషన్లు",
+    "currency": "డిఫాల్ట్ కరెన్సీ",
+    "temperature": "ఉష్ణోగ్రత యూనిట్",
+    "celsius": "సెల్సియస్",
+    "fahrenheit": "ఫారెన్ హీట్"
+  }
+}

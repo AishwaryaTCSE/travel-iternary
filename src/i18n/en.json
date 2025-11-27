@@ -1,0 +1,162 @@
+{
+  "app": {
+    "name": "Travel Itinerary Planner",
+    "title": "Travel Itinerary Planner",
+    "subtitle": "Plan Your Perfect Trip",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "add": "Add",
+    "search": "Search",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "selectLanguage": "Select Language"
+  },
+  "auth": {
+    "tagline": "Your Personal Travel Assistant",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email Address",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account? Sign In",
+    "loginSuccess": "Successfully logged in!",
+    "loginError": "Invalid email or password",
+    "registerSuccess": "Registration successful! Please check your email to verify your account.",
+    "passwordResetSuccess": "Password reset email sent. Please check your inbox.",
+    "resetPassword": "Reset Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordsDontMatch": "Passwords don't match"
+  },
+  "common": {
+    "backToHome": "Back to Home",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "footer": {
+    "rights": " 2023 Travel Itinerary Planner. All rights reserved."
+  },
+  "navigation": {
+    "home": "Home",
+    "itinerary": "Itinerary",
+    "expenses": "Expenses",
+    "packing": "Packing List",
+    "map": "Map",
+    "weather": "Weather",
+    "documents": "Documents",
+    "settings": "Settings"
+  },
+  "trip": {
+    "createTrip": "Create New Trip",
+    "tripName": "Trip Name",
+    "destination": "Destination",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "description": "Description",
+    "noTrips": "No trips found. Create your first trip!",
+    "deleteConfirm": "Are you sure you want to delete this trip?",
+    "days": "{{count}} day",
+    "days_plural": "{{count}} days"
+  },
+  "itinerary": {
+    "addActivity": "Add Activity",
+    "activityName": "Activity Name",
+    "location": "Location",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "category": "Category",
+    "notes": "Notes",
+    "noActivities": "No activities planned for this day.",
+    "transport": "Transport",
+    "accommodation": "Accommodation",
+    "food": "Food",
+    "sightseeing": "Sightseeing",
+    "other": "Other"
+  },
+  "expenses": {
+    "addExpense": "Add Expense",
+    "expenseName": "Expense Name",
+    "amount": "Amount",
+    "category": "Category",
+    "date": "Date",
+    "currency": "Currency",
+    "total": "Total",
+    "budget": "Budget",
+    "remaining": "Remaining",
+    "spent": "Spent",
+    "categories": {
+      "transport": "Transport",
+      "accommodation": "Accommodation",
+      "food": "Food",
+      "activities": "Activities",
+      "shopping": "Shopping",
+      "other": "Other"
+    }
+  },
+  "packing": {
+    "addItem": "Add Item",
+    "itemName": "Item Name",
+    "category": "Category",
+    "quantity": "Quantity",
+    "packed": "Packed",
+    "categories": {
+      "clothing": "Clothing",
+      "toiletries": "Toiletries",
+      "electronics": "Electronics",
+      "documents": "Documents",
+      "accessories": "Accessories",
+      "other": "Other"
+    }
+  },
+  "weather": {
+    "forecast": "Weather Forecast",
+    "current": "Current Weather",
+    "high": "High",
+    "low": "Low",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "precipitation": "Precipitation"
+  },
+  "documents": {
+    "upload": "Upload Document",
+    "noDocuments": "No documents uploaded yet.",
+    "types": {
+      "passport": "Passport",
+      "visa": "Visa",
+      "tickets": "Tickets",
+      "reservations": "Reservations",
+      "other": "Other"
+    }
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme",
+    "darkMode": "Dark Mode",
+    "notifications": "Notifications",
+    "currency": "Default Currency",
+    "temperature": "Temperature Unit",
+    "celsius": "Celsius",
+    "fahrenheit": "Fahrenheit"
+  }
+}

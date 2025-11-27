@@ -1,0 +1,48 @@
+{
+  "clothing": [
+    "T-shirts",
+    "Shirts",
+    "Pants/Jeans",
+    "Shorts",
+    "Underwear",
+    "Socks",
+    "Sleepwear",
+    "Swimwear"
+  ],
+  "footwear": [
+    "Walking shoes",
+    "Casual shoes",
+    "Sandals/Flip-flops"
+  ],
+  "toiletries": [
+    "Toothbrush & toothpaste",
+    "Shampoo & conditioner",
+    "Soap/body wash",
+    "Deodorant",
+    "Razor & shaving cream",
+    "Hairbrush/comb",
+    "Sunscreen",
+    "First-aid kit"
+  ],
+  "documents": [
+    "Passport/ID",
+    "Travel tickets",
+    "Hotel reservations",
+    "Travel insurance",
+    "Emergency contacts"
+  ],
+  "electronics": [
+    "Smartphone & charger",
+    "Laptop/tablet & charger",
+    "Camera & accessories",
+    "Power bank",
+    "Universal adapter"
+  ],
+  "miscellaneous": [
+    "Water bottle",
+    "Umbrella/raincoat",
+    "Daypack",
+    "Travel pillow",
+    "Earplugs & eye mask"
+  ]
+}

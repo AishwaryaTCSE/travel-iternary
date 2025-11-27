@@ -1,0 +1,127 @@
+{
+  "app": {
+    "title": "यात्रा योजनाकार",
+    "subtitle": "अपनी सही यात्रा की योजना बनाएं",
+    "loading": "लोड हो रहा है...",
+    "error": "एक त्रुटि हुई",
+    "success": "सफलता!",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "view": "देखें",
+    "add": "जोड़ें",
+    "search": "खोजें",
+    "close": "बंद करें",
+    "back": "पीछे",
+    "next": "अगला",
+    "previous": "पिछला",
+    "submit": "जमा करें",
+    "reset": "रीसेट करें",
+    "confirm": "पुष्टि करें",
+    "selectLanguage": "भाषा चुनें"
+  },
+  "navigation": {
+    "home": "होम",
+    "itinerary": "यात्रा कार्यक्रम",
+    "expenses": "खर्चे",
+    "packing": "सामान की सूची",
+    "map": "नक्शा",
+    "weather": "मौसम",
+    "documents": "दस्तावेज़",
+    "settings": "सेटिंग्स"
+  },
+  "trip": {
+    "createTrip": "नई यात्रा बनाएं",
+    "tripName": "यात्रा का नाम",
+    "destination": "गंतव्य",
+    "startDate": "प्रारंभ तिथि",
+    "endDate": "समाप्ति तिथि",
+    "description": "विवरण",
+    "noTrips": "कोई यात्रा नहीं मिली। अपनी पहली यात्रा बनाएं!",
+    "deleteConfirm": "क्या आप वाकई इस यात्रा को हटाना चाहते हैं?",
+    "days": "{{count}} दिन",
+    "days_plural": "{{count}} दिन"
+  },
+  "itinerary": {
+    "addActivity": "गतिविधि जोड़ें",
+    "activityName": "गतिविधि का नाम",
+    "location": "स्थान",
+    "date": "तारीख",
+    "time": "समय",
+    "duration": "अवधि",
+    "category": "श्रेणी",
+    "notes": "नोट्स",
+    "noActivities": "इस दिन के लिए कोई गतिविधि नियोजित नहीं है।",
+    "transport": "यातायात",
+    "accommodation": "आवास",
+    "food": "भोजन",
+    "sightseeing": "दर्शनीय स्थल",
+    "other": "अन्य"
+  },
+  "expenses": {
+    "addExpense": "खर्च जोड़ें",
+    "expenseName": "खर्च का नाम",
+    "amount": "राशि",
+    "category": "श्रेणी",
+    "date": "तारीख",
+    "currency": "मुद्रा",
+    "total": "कुल",
+    "budget": "बजट",
+    "remaining": "शेष",
+    "spent": "खर्च किया गया",
+    "categories": {
+      "transport": "यातायात",
+      "accommodation": "आवास",
+      "food": "भोजन",
+      "activities": "गतिविधियाँ",
+      "shopping": "खरीदारी",
+      "other": "अन्य"
+    }
+  },
+  "packing": {
+    "addItem": "आइटम जोड़ें",
+    "itemName": "आइटम का नाम",
+    "category": "श्रेणी",
+    "quantity": "मात्रा",
+    "packed": "पैक किया गया",
+    "categories": {
+      "clothing": "कपड़े",
+      "toiletries": "टॉयलेटरीज़",
+      "electronics": "इलेक्ट्रॉनिक्स",
+      "documents": "दस्तावेज़",
+      "accessories": "सामान",
+      "other": "अन्य"
+    }
+  },
+  "weather": {
+    "forecast": "मौसम पूर्वानुमान",
+    "current": "वर्तमान मौसम",
+    "high": "अधिकतम",
+    "low": "न्यूनतम",
+    "humidity": "नमी",
+    "wind": "हवा",
+    "precipitation": "वर्षा"
+  },
+  "documents": {
+    "upload": "दस्तावेज़ अपलोड करें",
+    "noDocuments": "अभी तक कोई दस्तावेज़ अपलोड नहीं किया गया है।",
+    "types": {
+      "passport": "पासपोर्ट",
+      "visa": "वीज़ा",
+      "tickets": "टिकट",
+      "reservations": "आरक्षण",
+      "other": "अन्य"
+    }
+  },
+  "settings": {
+    "language": "भाषा",
+    "theme": "थीम",
+    "darkMode": "डार्क मोड",
+    "notifications": "सूचनाएं",
+    "currency": "डिफ़ॉल्ट मुद्रा",
+    "temperature": "तापमान इकाई",
+    "celsius": "सेल्सियस",
+    "fahrenheit": "फ़ारेनहाइट"
+  }
+}
