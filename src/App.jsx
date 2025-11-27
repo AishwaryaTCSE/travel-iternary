@@ -82,6 +82,46 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error caught by error boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h5" color="error" gutterBottom>
+            Something went wrong
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {this.state.error?.message || 'An unexpected error occurred'}
+          </Typography>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => window.location.reload()}
+          >
+            Reload Page
+          </Button>
+        </Box>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // Main Layout - Wraps protected routes with header and layout structure
 const MainLayout = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -97,33 +137,32 @@ const MainLayout = ({ children }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header isAuthenticated={isAuthenticated} />
+    <ErrorBoundary>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
+          p: 3,
           pt: 8,
-          bgcolor: themeMode === 'dark' ? '#121212' : '#f5f5f5',
+          backgroundColor: 'background.default',
           minHeight: 'calc(100vh - 64px)'
         }}
       >
-        <Container maxWidth="xl" sx={{ py: 3 }}>
-          {children}
-        </Container>
+        {children}
       </Box>
-    </Box>
+    </ErrorBoundary>
   );
 };
 
 function App() {
   const { theme } = useTheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <div className={`app ${theme}-theme`}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Header isAuthenticated={isAuthenticated} />
         <ToastContainer
           position="bottom-right"
           autoClose={5000}
@@ -151,14 +190,16 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/itinerary" element={<ItineraryList />} />
-              <Route path="/itinerary/create" element={<ItineraryCreate />} />
-              <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/packing" element={<PackingList />} />
-              <Route path="/map" element={<MapView />} />
-              <Route path="/weather" element={<Weather />} />
-              <Route path="/documents" element={<Documents />} />
+              <Route path="itinerary">
+                <Route index element={<ItineraryList />} />
+                <Route path="create" element={<ItineraryCreate />} />
+                <Route path=":tripId" element={<ItineraryDetail />} />
+              </Route>
+              <Route path="expenses/:tripId" element={<Expenses />} />
+              <Route path="packing/:tripId" element={<PackingList />} />
+              <Route path="map/:tripId" element={<MapView />} />
+              <Route path="weather/:tripId" element={<Weather />} />
+              <Route path="documents/:tripId" element={<Documents />} />
               <Route path="/booking/:destinationId" element={<Booking />} />
               <Route path="/settings" element={<Settings />} />
             </Route>

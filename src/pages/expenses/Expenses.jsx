@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useItinerary } from '../../context/ItineraryContext';
 import {
   Box,
   Typography,
@@ -29,7 +30,9 @@ import {
   Grid,
   Card,
   CardContent,
-  Tooltip
+  Tooltip,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import { 
   FiPlus, 
@@ -42,7 +45,9 @@ import {
   FiPieChart,
   FiFilter,
   FiDownload,
-  FiPrinter
+  FiPrinter,
+  FiArrowLeft,
+  FiAlertCircle
 } from 'react-icons/fi';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -65,14 +70,19 @@ const categories = [
 const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'INR'];
 
 const Expenses = () => {
-  const { id } = useParams(); // Itinerary ID
+  const { tripId } = useParams();
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { getTripById } = useItinerary();
   
   // State for expenses data
+  const [trip, setTrip] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [currency, setCurrency] = useState('USD');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -90,14 +100,39 @@ const Expenses = () => {
     dailyAverage: 0
   });
 
-  // Load sample data (replace with API call)
+  // Load trip and expenses data
   useEffect(() => {
-    // This would be an API call in a real app
-    const sampleExpenses = [
-      { id: 1, description: 'Hotel Booking', amount: 120, category: 'Accommodation', date: new Date(2023, 5, 15), notes: '2 nights at Grand Hotel' },
-      { id: 2, description: 'Dinner', amount: 45.50, category: 'Food & Drinks', date: new Date(2023, 5, 15), notes: 'Italian restaurant' },
-      { id: 3, description: 'Museum Tickets', amount: 28, category: 'Activities', date: new Date(2023, 5, 16), notes: 'City Museum entrance' },
-    ];
+    const loadTrip = async () => {
+      try {
+        setLoading(true);
+        if (tripId && getTripById) {
+          const tripData = await getTripById(tripId);
+          if (tripData) {
+            setTrip(tripData);
+            // If the trip has expenses, use them; otherwise, use sample data
+            if (tripData.expenses && tripData.expenses.length > 0) {
+              setExpenses(tripData.expenses);
+            } else {
+              // Fallback to sample data if no expenses exist
+              const sampleExpenses = [
+                { id: 1, description: 'Hotel Booking', amount: 120, category: 'Accommodation', date: new Date(), notes: '2 nights at Grand Hotel' },
+                { id: 2, description: 'Dinner', amount: 45.50, category: 'Food & Drinks', date: new Date(), notes: 'Italian restaurant' },
+                { id: 3, description: 'Museum Tickets', amount: 28, category: 'Activities', date: new Date(), notes: 'City Museum entrance' },
+              ];
+              setExpenses(sampleExpenses);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error loading trip:', err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrip();
+  }, [tripId, getTripById]);
     
     setExpenses(sampleExpenses);
     calculateStats(sampleExpenses);

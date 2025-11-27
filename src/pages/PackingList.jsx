@@ -1,33 +1,98 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useItinerary } from '../context/ItineraryContext';
 import { useTranslation } from 'react-i18next';
 import PackingListComponent from '../components/packing/PackingList';
+import { Box, Typography, Button, Container } from '@mui/material';
+import { FiArrowLeft } from 'react-icons/fi';
 
 const PackingListPage = () => {
   const { tripId } = useParams();
-  const { trips } = useItinerary();
+  const navigate = useNavigate();
+  const { trips, getTripById } = useItinerary();
   const { t } = useTranslation();
+  const [trip, setTrip] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const trip = trips.find(t => t.id === tripId);
+  useEffect(() => {
+    const loadTrip = async () => {
+      try {
+        // Try to find trip in local state first
+        const foundTrip = trips.find(t => t.id === tripId);
+        
+        if (foundTrip) {
+          setTrip(foundTrip);
+        } else if (getTripById) {
+          // If not found, try to fetch it
+          const fetchedTrip = await getTripById(tripId);
+          if (fetchedTrip) {
+            setTrip(fetchedTrip);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading trip:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTrip();
+  }, [tripId, trips, getTripById]);
+
+  const handleUpdatePackingList = (updatedCategories) => {
+    // You can implement saving logic here if needed
+    console.log('Updated packing list:', updatedCategories);
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
 
   if (!trip) {
-    return <div className="p-6 text-center">{t('common.tripNotFound')}</div>;
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Button 
+          startIcon={<FiArrowLeft />} 
+          onClick={() => navigate(-1)}
+          sx={{ mb: 3 }}
+        >
+          {t('common.back')}
+        </Button>
+        <Typography variant="h5" align="center" gutterBottom>
+          {t('common.tripNotFound')}
+        </Typography>
+      </Container>
+    );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Button 
+        startIcon={<FiArrowLeft />} 
+        onClick={() => navigate(-1)}
+        sx={{ mb: 3 }}
+      >
+        {t('common.back')}
+      </Button>
+      
+      <Box mb={4}>
+        <Typography variant="h4" component="h1" gutterBottom>
           {t('packingList.title')} - {trip.destination}
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
+        </Typography>
+        <Typography color="text.secondary" paragraph>
           {t('packingList.subtitle')}
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      <PackingListComponent />
-    </div>
+      <PackingListComponent 
+        tripDetails={trip} 
+        onUpdate={handleUpdatePackingList} 
+      />
+    </Container>
   );
 };
 
