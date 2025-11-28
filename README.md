@@ -1,16 +1,84 @@
-# React + Vite
+✈️ Travel Itinerary Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A smart and user-friendly Travel Itinerary Planner built to help travelers organize trips, explore destinations, track daily plans, and manage travel details in one place. This app simplifies travel planning with interactive maps, activity scheduling, real-time weather, and personalized itineraries.
 
-Currently, two official plugins are available:
+🌍 Features
+🗺️ Interactive Destination Search
+Find cities, countries, and attractions with integrated map support.
+📅 Daily Itinerary Builder
+Add activities, time slots, notes, travel routes, and more.
+🌦️ Weather Integration
+Get real-time weather data for your travel destination.
+⭐ Popular Places & Recommendations
+Display famous tourist attractions, hotels, cafes, and more.
+🧳 Packing Checklist
+Create and manage a personalized packing list.
+👥 Multi-Trip Support
+Create, edit, and store multiple travel itineraries.
+💾 Save to Local Storage / Firebase (optional)
+Your itineraries remain safe even after refreshing.
+📱 Fully Responsive UI
+Works on mobile, tablet, and desktop.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🛠️ Tech Stack
+Frontend
 
-## React Compiler
+React.js
+Vite
+JavaScript (ES6+)
+HTML5
+CSS3 / Tailwind CSS
+APIs & Integrations
+OpenWeather API
+Google Maps API / Mapbox API
+Travel Advisor API (optional)
+Firebase (Optional)
+Firebase Authentication
+Firebase Firestore / Realtime Database
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Tools
 
-## Expanding the ESLint configuration
+Git & GitHub
+Axios / Fetch API
+ESLint
+Prettier
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+📁 Folder Structure
+travel-itinerary-planner/
+|── public/
+|── src/
+│   ├── components/
+│   ├── pages/
+│   ├── assets/
+│   ├── hooks/
+│   └── App.jsx
+|── package.json
+|── README.md
+
+🚀 Getting Started
+1. Clone the repository
+git clone https://github.com/your-username/travel-itinerary-planner.git
+cd travel-itinerary-planner
+
+2. Install dependencies
+npm install
+
+3. Run the development server
+npm run dev
+
+📦 Build for Production
+npm run build
+
+🔮 Future Enhancements
+
+AI-based itinerary suggestions
+Expense calculator module
+Travel calendar with drag & drop
+
+Offline mode
+
+Multi-user collaboration
+🤝 Contributing
+
+Contributions are welcome!
+Feel free to fork this repo and submit pull requests.
