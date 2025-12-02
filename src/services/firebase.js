@@ -63,11 +63,20 @@ const signUp = async (email, password, displayName) => {
 };
 
 const signIn = async (email, password) => {
+  console.log('Attempting to sign in with:', { email });
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Sign in successful for user:', userCredential.user?.email);
     return userCredential.user;
   } catch (error) {
-    throw new Error(error.message);
+    console.error('Firebase signIn error:', {
+      code: error.code,
+      message: error.message,
+      email: email,
+      timestamp: new Date().toISOString()
+    });
+    // Re-throw with the original error to preserve error code
+    throw error;
   }
 };
 
@@ -207,6 +216,7 @@ const deleteFile = async (filePath) => {
 
 // Export all the functions
 export {
+  app,
   auth,
   db,
   storage,

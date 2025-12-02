@@ -94,7 +94,7 @@ const router = createBrowserRouter([
           },
           { path: 'expenses', element: <Expenses /> },
           { path: 'packing', element: <PackingList /> },
-          { path: 'map', element: <MapView /> },
+          { path: 'trip/:tripId/map', element: <MapView /> },
           { path: 'weather', element: <Weather /> },
           { path: 'documents', element: <Documents /> },
           { path: 'profile', element: <Profile /> },

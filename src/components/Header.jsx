@@ -23,22 +23,41 @@ import {
   FiUser
 } from 'react-icons/fi';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useItinerary } from '../context/ItineraryContext';
 
-const Header = ({ isAuthenticated = false }) => {
+const Header = () => {
+  const { isAuthenticated } = useAuth(); // Get auth state from context
   const theme = useTheme();
   const location = useLocation();
+  const { currentTrip } = useItinerary();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Define base nav items and whether they require a tripId
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: <FiHome /> },
-    { name: 'Itinerary', path: '/itinerary', icon: <FiCalendar /> },
-    { name: 'Map', path: '/map', icon: <FiMap /> },
-    { name: 'Expenses', path: '/expenses', icon: <FiDollarSign /> },
-    { name: 'Packing', path: '/packing', icon: <FiLayers /> },
-    { name: 'Weather', path: '/weather', icon: <FiSun /> },
-    { name: 'Documents', path: '/documents', icon: <FiFileText /> }
+    { name: 'Dashboard', base: 'dashboard', icon: <FiHome />, requiresTrip: false },
+    { name: 'Itinerary', base: 'itinerary', icon: <FiCalendar />, requiresTrip: false },
+    { name: 'Map', base: 'map', icon: <FiMap />, requiresTrip: true, optionalTrip: true },
+    { name: 'Expenses', base: 'expenses', icon: <FiDollarSign />, requiresTrip: true },
+    { name: 'Packing', base: 'packing', icon: <FiLayers />, requiresTrip: true },
+    { name: 'Weather', base: 'weather', icon: <FiSun />, requiresTrip: true },
+    { name: 'Documents', base: 'documents', icon: <FiFileText />, requiresTrip: true }
   ];
+
+  const resolvePath = (item) => {
+    const tripId = currentTrip?.id;
+    if (item.base === 'dashboard') return '/dashboard';
+    if (item.base === 'itinerary') return '/itinerary';
+    if (item.base === 'map') return tripId ? `/map/${tripId}` : '/map';
+    if (item.requiresTrip) return tripId ? `/${item.base}/${tripId}` : `/${item.base}`;
+    return `/${item.base}`;
+  };
+
+  const isActive = (targetPath) => {
+    // Basic startsWith check covers dynamic paths like /expenses/:tripId
+    return location.pathname === targetPath || location.pathname.startsWith(targetPath);
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -52,10 +71,18 @@ const Header = ({ isAuthenticated = false }) => {
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        zIndex: theme.zIndex.appBar,
+        zIndex: theme.zIndex.drawer + 1,
+        height: '64px',
+        display: 'flex',
+        justifyContent: 'center'
       }}
     >
-      <Toolbar>
+      <Toolbar disableGutters sx={{ 
+        minHeight: '64px !important',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        width: '100%'
+      }}>
         {/* Logo */}
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <FiGlobe size={24} style={{ marginRight: 12, color: theme.palette.primary.main }} />
@@ -75,68 +102,84 @@ const Header = ({ isAuthenticated = false }) => {
             TravelPlanner
           </Typography>
 
-          {/* Desktop Navigation */}
-          {isAuthenticated && (
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-              {navItems.map((item) => (
-                <Button
-                  key={item.path}
-                  component={Link}
-                  to={item.path}
-                  startIcon={item.icon}
-                  sx={{
-                    color: location.pathname === item.path ? 'primary.main' : 'text.secondary',
-                    '&:hover': {
-                      color: 'primary.main',
-                      backgroundColor: 'action.hover',
-                    },
-                    fontWeight: location.pathname === item.path ? 600 : 400,
-                    textTransform: 'none',
-                    px: 2,
-                  }}
-                >
-                  {item.name}
-                </Button>
-              ))}
+          {/* Desktop Navigation - Always show navigation */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
+              {navItems.map((item) => {
+                const targetPath = resolvePath(item);
+                return (
+                  <Button
+                    key={item.base}
+                    component={Link}
+                    to={targetPath}
+                    startIcon={item.icon}
+                    sx={{
+                      color: isActive(targetPath) ? 'primary.main' : 'text.secondary',
+                      '&:hover': {
+                        color: 'primary.main',
+                        backgroundColor: 'action.hover',
+                      },
+                      fontWeight: isActive(targetPath) ? 600 : 400,
+                      textTransform: 'none',
+                      px: 2,
+                    }}
+                    title={item.requiresTrip && !currentTrip ? 'Select a trip from Itinerary' : undefined}
+                  >
+                    {item.name}
+                  </Button>
+                );
+              })}
             </Box>
-          )}
         </Box>
 
         {/* Auth Buttons */}
-        {!isAuthenticated ? (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              component={Link}
-              to="/login"
-              variant={location.pathname === '/login' ? 'contained' : 'outlined'}
-              color="primary"
-              size="small"
-              sx={{ textTransform: 'none' }}
-            >
-              Sign In
-            </Button>
-            <Button
-              component={Link}
-              to="/signup"
-              variant="contained"
-              color="primary"
-              size="small"
-              sx={{ textTransform: 'none' }}
-            >
-              Sign Up
-            </Button>
-          </Box>
-        ) : (
-          <Button
-            component={Link}
-            to="/profile"
-            startIcon={<FiUser />}
-            color="inherit"
-            sx={{ textTransform: 'none' }}
-          >
-            Profile
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {isAuthenticated ? (
+            <>
+              <Button
+                component={Link}
+                to="/profile"
+                startIcon={<FiUser />}
+                color="inherit"
+                sx={{ textTransform: 'none' }}
+              >
+                Profile
+              </Button>
+              <Button
+                component={Link}
+                to="/logout"
+                variant="outlined"
+                color="inherit"
+                size="small"
+                sx={{ textTransform: 'none' }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                component={Link}
+                to="/login"
+                variant={location.pathname === '/login' ? 'contained' : 'outlined'}
+                color="primary"
+                size="small"
+                sx={{ textTransform: 'none' }}
+              >
+                Sign In
+              </Button>
+              <Button
+                component={Link}
+                to="/signup"
+                variant="contained"
+                color="primary"
+                size="small"
+                sx={{ textTransform: 'none' }}
+              >
+                Sign Up
+              </Button>
+            </>
+          )}
+        </Box>
 
         {/* Mobile Menu Button */}
         <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
@@ -151,42 +194,26 @@ const Header = ({ isAuthenticated = false }) => {
           </IconButton>
         </Box>
 
-        {/* Right-side actions */}
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
-          <Typography 
-            component={Link}
-            to="/auth/forgot-password"
-            color="text.secondary"
-            sx={{ 
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              '&:hover': {
-                color: 'primary.main',
-                textDecoration: 'underline'
-              }
-            }}
-          >
-            Forgot Password?
-          </Typography>
-          <Button
-            component={Link}
-            to="/login"
-            variant="outlined"
-            size="small"
-            sx={{ textTransform: 'none' }}
-          >
-            Sign In
-          </Button>
-          <Button
-            component={Link}
-            to="/signup"
-            variant="contained"
-            size="small"
-            sx={{ textTransform: 'none' }}
-          >
-            Sign Up
-          </Button>
-        </Box>
+        {/* Forgot Password Link (only when not authenticated) */}
+        {!isAuthenticated && (
+          <Box sx={{ display: { xs: 'none', md: 'block' }, ml: 2 }}>
+            <Typography 
+              component={Link}
+              to="/auth/forgot-password"
+              color="text.secondary"
+              sx={{ 
+                textDecoration: 'none',
+                fontSize: '0.875rem',
+                '&:hover': {
+                  color: 'primary.main',
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              Forgot Password?
+            </Typography>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
   );

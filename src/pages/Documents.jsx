@@ -1,18 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useItinerary } from '../context/ItineraryContext';
 import { useTranslation } from 'react-i18next';
 import { FiUpload, FiDownload, FiTrash2, FiFile, FiImage, FiFileText } from 'react-icons/fi';
+import { getRequiredDocuments } from '../services/documents';
 
 const Documents = () => {
   const { tripId } = useParams();
-  const { trips, updateTrip } = useItinerary();
+  const { trips, currentTrip, updateTrip } = useItinerary();
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [requiredDocs, setRequiredDocs] = useState([]);
 
-  const trip = trips.find(t => t.id === tripId);
+  const trip = tripId ? trips.find(t => t.id === tripId) : currentTrip;
   const documents = trip?.documents || [];
+
+  useEffect(() => {
+    let mounted = true;
+    const run = async () => {
+      const docs = await getRequiredDocuments(trip);
+      if (mounted) setRequiredDocs(docs);
+    };
+    if (trip) run();
+    return () => { mounted = false; };
+  }, [trip]);
 
   const getFileIcon = (fileType) => {
     if (fileType.startsWith('image/')) {
@@ -101,6 +113,26 @@ const Documents = () => {
           {t('documents.subtitle')}
         </p>
       </div>
+
+      {requiredDocs.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Required Documents</h2>
+            <ul className="space-y-2">
+              {requiredDocs.map((d, idx) => (
+                <li key={idx} className="flex items-center justify-between">
+                  <span className="text-sm">{d.name}</span>
+                  {d.required ? (
+                    <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Required</span>
+                  ) : (
+                    <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Optional</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">

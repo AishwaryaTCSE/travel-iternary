@@ -55,7 +55,28 @@ const Login = () => {
       navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+      let errorMessage = 'Login failed. Please check your credentials.';
+      
+      // Handle specific Firebase auth errors
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            errorMessage = 'Invalid email or password. Please try again.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Too many failed attempts. Please try again later or reset your password.';
+            break;
+          case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled. Please contact support.';
+            break;
+          default:
+            errorMessage = error.message || 'Login failed. Please try again.';
+        }
+      }
+      
+      toast.error(errorMessage);
     }
   };
 

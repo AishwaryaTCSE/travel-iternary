@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useItinerary } from '../../context/ItineraryContext';
 import { 
   Box, 
   Typography, 
@@ -37,6 +38,7 @@ const steps = ['Basic Info', 'Trip Details', 'Review'];
 
 const ItineraryCreate = () => {
   const navigate = useNavigate();
+  const { createTrip } = useItinerary();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
@@ -105,11 +107,26 @@ const ItineraryCreate = () => {
   };
 
   const handleSubmit = () => {
-    // Here you would typically send the data to your API
-    console.log('Submitting form:', formData);
+    const payload = {
+      title: formData.title,
+      destination: formData.destination,
+      startDate: formData.startDate?.toISOString?.() || formData.startDate,
+      endDate: formData.endDate?.toISOString?.() || formData.endDate,
+      travelers: formData.travelers,
+      budget: formData.budget ? Number(formData.budget) : undefined,
+      description: formData.description,
+      tripType: formData.tripType,
+      privacy: formData.privacy,
+      status: 'active',
+      createdAt: new Date().toISOString()
+    };
+    const newTrip = createTrip(payload);
     
-    // For demo purposes, just navigate back to the list
-    navigate('/itinerary');
+    // Store the trip ID in session storage for the map page to use
+    sessionStorage.setItem('currentTripId', newTrip.id);
+    
+    // Navigate to map page with the new trip ID
+    navigate(`/map?tripId=${newTrip.id}`);
   };
 
   const renderStepContent = (step) => {

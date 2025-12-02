@@ -1,108 +1,43 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useItinerary } from '../../context/ItineraryContext';
-import {
-  Box,
-  Typography,
-  Container,
-  Paper,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
+import { 
+  Box, 
+  Container, 
+  Paper, 
+  Typography, 
+  Button, 
+  CircularProgress,
+  Grid,
+  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  useTheme,
-  Chip,
-  Grid,
-  Card,
-  CardContent,
-  Tooltip,
-  CircularProgress,
-  Alert,
+  DialogActions
 } from '@mui/material';
-import {
-  FiPlus,
-  FiTrash2,
-  FiEdit2,
-  FiDollarSign,
-  FiCalendar,
-  FiTag,
-  FiInfo,
-  FiDownload,
-  FiPrinter,
-} from 'react-icons/fi';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip as ChartTooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-} from 'chart.js';
-import 'chart.js/auto';
-
-// Register ChartJS components
-ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
-
-// Sample categories
-const categories = [
-  'Accommodation',
-  'Food & Drinks',
-  'Transportation',
-  'Activities',
-  'Shopping',
-  'Flights',
-  'Others'
-];
-
-// Currency options
-const currencies = [
-  { code: 'USD', symbol: '$' },
-  { code: 'EUR', symbol: '€' },
-  { code: 'GBP', symbol: '£' },
-  { code: 'JPY', symbol: '¥' },
-  { code: 'AUD', symbol: 'A$' },
-  { code: 'CAD', symbol: 'C$' },
-  { code: 'INR', symbol: '₹' }
-];
+import { FiPlus } from 'react-icons/fi';
+import { 
+  ExpenseList, 
+  ExpenseForm, 
+  ExpenseSummary, 
+  ExpenseChart, 
+  ExpenseCategories 
+} from '../../components/expenses';
 
 const Expenses = () => {
   const { tripId } = useParams();
   const theme = useTheme();
   const navigate = useNavigate();
-  const { getTripById } = useItinerary();
-
+  const { getTripById, updateTrip } = useItinerary();
+  
   // State management
   const [trip, setTrip] = useState(null);
   const [expenses, setExpenses] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  // Default currency is USD, but you can add logic to detect/set based on trip.
-  const [currency] = useState(
-    currencies.find(c => c.code === 'USD') || { code: 'USD', symbol: '$' }
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  // Filtering states are kept but not fully implemented in the logic provided.
+  
+  // Load trip and expenses
   const [filters] = useState({
     category: '',
     startDate: null,

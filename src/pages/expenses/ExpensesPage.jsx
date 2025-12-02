@@ -1,0 +1,282 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useItinerary } from '../../context/ItineraryContext';
+import { estimateExpenses } from '../../services/expenses';
+import { 
+  Box, 
+  Container, 
+  Paper, 
+  Typography, 
+  Button, 
+  CircularProgress,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  useTheme
+} from '@mui/material';
+import { FiPlus } from 'react-icons/fi';
+import { 
+  ExpenseList, 
+  ExpenseForm, 
+  ExpenseSummary, 
+  ExpenseChart, 
+  ExpenseCategories 
+} from '../../components/expenses';
+
+const ExpensesPage = () => {
+  const { tripId } = useParams();
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const { trips, currentTrip, getTripById, updateTrip } = useItinerary();
+  
+  // State management
+  const [trip, setTrip] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Load trip and expenses
+  useEffect(() => {
+    const loadTrip = async () => {
+      try {
+        setIsLoading(true);
+        const activeId = tripId || currentTrip?.id;
+        if (!activeId) {
+          setError('No trip selected');
+          return;
+        }
+
+        const tripData = getTripById?.(activeId) || trips.find(t => t.id === activeId);
+        if (!tripData) {
+          setError('Trip not found');
+          return;
+        }
+        
+        setTrip(tripData);
+        setExpenses(tripData.expenses || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading trip:', err);
+        setError('Failed to load trip data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTrip();
+  }, [tripId, currentTrip, trips, getTripById]);
+
+  // Handle save expense
+  const handleSaveExpense = (expenseData) => {
+    try {
+      const updatedExpenses = editingExpense
+        ? expenses.map(exp => 
+            exp.id === editingExpense.id ? { ...exp, ...expenseData } : exp
+          )
+        : [...expenses, { ...expenseData, id: Date.now().toString() }];
+      
+      setExpenses(updatedExpenses);
+      
+      // Update trip in context
+      if (trip) {
+        updateTrip(trip.id, { expenses: updatedExpenses });
+      }
+      
+      setIsFormOpen(false);
+      setEditingExpense(null);
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      setError('Failed to save expense');
+    }
+  };
+
+  // Handle delete expense
+  const handleDeleteExpense = (expenseId) => {
+    try {
+      const updatedExpenses = expenses.filter(exp => exp.id !== expenseId);
+      setExpenses(updatedExpenses);
+      
+      // Update trip in context
+      if (trip) {
+        updateTrip(trip.id, { expenses: updatedExpenses });
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      setError('Failed to delete expense');
+    }
+  };
+
+  // Handle edit expense
+  const handleEditExpense = (expense) => {
+    setEditingExpense(expense);
+    setIsFormOpen(true);
+  };
+
+  // Handle close form
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    setEditingExpense(null);
+  };
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography color="error" gutterBottom>{error}</Typography>
+          <Button variant="contained" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
+
+  if (!tripId && !currentTrip?.id) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom>
+            No trip selected
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Please select a trip to view its expenses.
+          </Typography>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => navigate('/itinerary')}
+            startIcon={<FiArrowLeft />}
+          >
+            Back to Itineraries
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom>
+            Trip not found
+          </Typography>
+          <Typography variant="body1" paragraph>
+            The requested trip could not be found.
+          </Typography>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={() => navigate('/itinerary')}
+            startIcon={<FiArrowLeft />}
+          >
+            Back to Itineraries
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4" component="h1">
+            Expenses for {trip.destination || 'Trip'}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FiPlus />}
+            onClick={() => setIsFormOpen(true)}
+          >
+            Add Expense
+          </Button>
+        </Box>
+
+        {/* Summary Section */}
+        <Box sx={{ mb: 4 }}>
+          <ExpenseSummary expenses={expenses} />
+          {trip && (
+            <Paper sx={{ p: 2, mt: 2 }}>
+              {(() => {
+                const est = estimateExpenses(trip);
+                return (
+                  <div>
+                    <Typography variant="h6" gutterBottom>
+                      Estimated Trip Expenses
+                    </Typography>
+                    <Typography variant="body2">
+                      Total: {new Intl.NumberFormat(undefined, { style: 'currency', currency: est.currency }).format(est.total)}
+                    </Typography>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                      {Object.entries(est.breakdown).map(([k, v]) => (
+                        <Grid item xs={12} sm={6} md={4} key={k}>
+                          <Paper sx={{ p: 1.5 }}>
+                            <Typography variant="body2" color="text.secondary">{k}</Typography>
+                            <Typography>
+                              {new Intl.NumberFormat(undefined, { style: 'currency', currency: est.currency }).format(v)}
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </div>
+                );
+              })()}
+            </Paper>
+          )}
+        </Box>
+
+        <Grid container spacing={3}>
+          {/* Expenses List */}
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 2, mb: 3 }}>
+              <ExpenseList 
+                expenses={expenses}
+                onEdit={handleEditExpense}
+                onDelete={handleDeleteExpense}
+              />
+            </Paper>
+          </Grid>
+
+          {/* Charts and Categories */}
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, mb: 3 }}>
+              <ExpenseChart expenses={expenses} />
+            </Paper>
+            <Paper sx={{ p: 2 }}>
+              <ExpenseCategories expenses={expenses} />
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Expense Form Dialog */}
+      <Dialog open={isFormOpen} onClose={handleCloseForm} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle>
+        <DialogContent>
+          <ExpenseForm 
+            expense={editingExpense}
+            onSave={handleSaveExpense}
+            onCancel={handleCloseForm}
+          />
+        </DialogContent>
+      </Dialog>
+    </Container>
+  );
+};
+
+export default ExpensesPage;

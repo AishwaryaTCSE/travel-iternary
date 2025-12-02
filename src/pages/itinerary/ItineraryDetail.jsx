@@ -26,13 +26,14 @@ import {
 } from 'react-icons/fi';
 
 const ItineraryDetail = () => {
-  const { id } = useParams();
+  const { id, tripId } = useParams();
+  const detailId = id || tripId;
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
 
   // Mock data - replace with actual data fetching
   const itinerary = {
-    id: id,
+    id: detailId,
     title: 'Summer Vacation 2023',
     destination: 'Bali, Indonesia',
     startDate: '2023-07-15',
@@ -56,7 +57,7 @@ const ItineraryDetail = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/itinerary/edit/${id}`);
+    navigate(`/itinerary/edit/${detailId}`);
   };
 
   const handleDelete = () => {

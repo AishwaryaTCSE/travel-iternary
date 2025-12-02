@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useItinerary } from '../../context/ItineraryContext';
+import { geocodeDestination } from '../../services/maps';
+import { getWeatherByCoords, getWeatherByCity } from '../../services/weather';
+import { generatePackingList } from '../../services/packing';
 import {
   Box,
   Typography,
@@ -67,8 +71,11 @@ const sampleItems = [
 ];
 
 const PackingList = () => {
-  const { id } = useParams(); // Itinerary ID
+  const { tripId } = useParams();
+  const { trips, currentTrip } = useItinerary();
+  const trip = tripId ? trips.find(t => t.id === tripId) : currentTrip;
   const [items, setItems] = useState(sampleItems);
+  const [weather, setWeather] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [tabValue, setTabValue] = useState('all');
@@ -105,6 +112,31 @@ const PackingList = () => {
       categories: categories
     });
   }, [items]);
+
+  useEffect(() => {
+    const run = async () => {
+      if (!trip?.destination) return;
+      try {
+        const geo = await geocodeDestination(trip.destination);
+        let w = null;
+        if (geo) {
+          w = await getWeatherByCoords(geo.lat, geo.lng, 'metric');
+        } else {
+          w = await getWeatherByCity(trip.destination, 'metric');
+        }
+        setWeather(w);
+        const rec = generatePackingList(trip, w);
+        // assign ids
+        const withIds = rec.map((it, idx) => ({ id: idx + 1, ...it }));
+        setItems(withIds);
+      } catch (e) {
+        const rec = generatePackingList(trip, null);
+        const withIds = rec.map((it, idx) => ({ id: idx + 1, ...it }));
+        setItems(withIds);
+      }
+    };
+    run();
+  }, [trip]);
   
   // Handle tab change
   const handleTabChange = (event, newValue) => {
@@ -209,7 +241,16 @@ const PackingList = () => {
             </Tooltip>
           </Box>
         </Box>
-        
+
+        {trip && (
+          <Paper sx={{ p: 2, mb: 3 }}>
+            <Typography variant="h6">AI Packing Recommendations</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Destination: {trip.destination} {weather?.current?.condition ? `• Weather: ${weather.current.condition}` : ''}
+            </Typography>
+          </Paper>
+        )}
+
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} md={4}>

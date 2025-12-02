@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
@@ -71,6 +71,8 @@ export const ItineraryProvider = ({ children }) => {
     }
   };
 
+  const getTripById = (tripId) => trips.find(t => t.id === tripId);
+
   // Activity CRUD operations
   const addActivity = (tripId, activity) => {
     const newActivity = {
@@ -105,6 +107,7 @@ export const ItineraryProvider = ({ children }) => {
         createTrip,
         updateTrip,
         deleteTrip,
+        getTripById,
         setCurrentTrip,
         addActivity,
         // Add other operations here

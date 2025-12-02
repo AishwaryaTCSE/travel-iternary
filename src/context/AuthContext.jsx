@@ -3,13 +3,25 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
-  auth, 
-  signUp, 
-  signIn, 
-  signInWithGoogle,
-  signOut as firebaseSignOut,
-  onAuthStateChanged as onFirebaseAuthStateChanged
-} from '../services/firebase';
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  updateProfile as updateAuthProfile
+} from 'firebase/auth';
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db, app } from '../services/firebase';
+
+// Initialize Firebase Auth
+const auth = getAuth(app);
 
 const AuthContext = createContext(null);
 
@@ -26,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     console.log('AuthProvider: Starting auth state check');
     let isMounted = true;
     
-    const unsubscribe = onFirebaseAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
       if (isMounted) {
         console.log('Auth state update - isMounted:', isMounted, 'User:', user);
@@ -77,10 +89,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Starting login process for:', email);
       setIsLoading(true);
       setError(null);
       
-      const { user } = await signIn(email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      if (!user) {
+        throw new Error('No user returned from sign in');
+      }
+      
+      console.log('User signed in successfully:', user.email);
       
       // Update local state
       const userData = {
@@ -97,17 +117,33 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error details:', {
+        code: error.code,
+        message: error.message,
+        timestamp: new Date().toISOString()
+      });
+      
       let errorMessage = 'Login failed. Please check your credentials.';
       
       // Handle specific Firebase errors
       switch (error.code) {
+        case 'auth/invalid-credential':
+          errorMessage = 'Invalid email or password. Please try again.';
+          break;
         case 'auth/user-not-found':
+          errorMessage = 'No account found with this email. Please sign up first.';
+          break;
         case 'auth/wrong-password':
-          errorMessage = 'Invalid email or password.';
+          errorMessage = 'Incorrect password. Please try again.';
           break;
         case 'auth/too-many-requests':
-          errorMessage = 'Too many failed login attempts. Please try again later.';
+          errorMessage = 'Too many failed login attempts. Please try again later or reset your password.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled. Please contact support.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
           break;
         case 'auth/user-disabled':
           errorMessage = 'This account has been disabled.';
@@ -130,10 +166,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       
       // Create user with email and password
-      const { user } = await signUp(userData.email, userData.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      const user = userCredential.user;
       
       // Update user profile with display name
-      await updateProfile(user, {
+      await updateAuthProfile(user, {
         displayName: userData.name,
         // You can add more profile fields here
       });
@@ -191,7 +228,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await firebaseSignOut();
+      await signOut(auth);
       setUser(null);
       setIsAuthenticated(false);
       toast.success('Logged out successfully');
@@ -202,17 +239,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateProfile = async (user, userData) => {
+  const updateProfile = async (userData) => {
     try {
       setIsLoading(true);
-      await user.updateProfile(userData);
-      toast.success('Profile updated successfully!');
-      return { success: true };
+      setError(null);
+      
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user');
+      }
+      
+      // Update the user's profile
+      await updateAuthProfile(currentUser, {
+        displayName: userData.displayName || currentUser.displayName,
+        photoURL: userData.photoURL || currentUser.photoURL
+      });
+      
+      // Update local state
+      const updatedUser = {
+        ...user,
+        displayName: userData.displayName || user?.displayName || '',
+        photoURL: userData.photoURL || user?.photoURL || ''
+      };
+      
+      setUser(updatedUser);
+      toast.success('Profile updated successfully');
+      return { success: true, user: updatedUser };
+      
     } catch (error) {
       console.error('Update profile error:', error);
-      setError(error.message || 'Failed to update profile.');
-      toast.error(error.message || 'Failed to update profile.');
-      return { success: false, error: error.message };
+      const errorMessage = error.message || 'Failed to update profile';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
@@ -220,10 +279,18 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     try {
+      console.log('Starting Google sign-in process');
       setIsLoading(true);
       setError(null);
       
+      // Initialize Google provider
       const provider = new GoogleAuthProvider();
+      
+      // Add any additional scopes you need
+      provider.addScope('profile');
+      provider.addScope('email');
+      
+      // Sign in with popup
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
@@ -231,21 +298,30 @@ export const AuthProvider = ({ children }) => {
         throw new Error('No user returned from Google sign-in');
       }
       
-      // Check if user exists in Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      console.log('Google sign-in successful for user:', user.email);
       
-      if (!userDoc.exists()) {
-        // Create user in Firestore if doesn't exist
-        await setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          phoneNumber: user.phoneNumber || '',
-          address: '',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+      try {
+        // Check if user exists in Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userDoc.exists()) {
+          console.log('Creating new user document in Firestore');
+          // Create user in Firestore if doesn't exist
+          await setDoc(doc(db, 'users', user.uid), {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            emailVerified: user.emailVerified || false,
+            phoneNumber: user.phoneNumber || '',
+            provider: 'google.com',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+        }
+      } catch (firestoreError) {
+        console.error('Error updating Firestore:', firestoreError);
+        // Don't fail the sign-in if Firestore update fails
       }
       
       // Update local state
@@ -254,23 +330,49 @@ export const AuthProvider = ({ children }) => {
         email: user.email,
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
-        emailVerified: user.emailVerified,
+        emailVerified: user.emailVerified || false,
         phoneNumber: user.phoneNumber || '',
       };
       
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Store auth state in localStorage if needed
       localStorage.setItem('isAuthenticated', 'true');
+      
+      // Show success message
+      toast.success('Signed in with Google successfully!');
       
       // Redirect to the intended page or home
       const from = location.state?.from?.pathname || '/';
+      console.log('Redirecting to:', from);
       navigate(from, { replace: true });
       
-      toast.success('Login successful!');
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
-      console.error('Google sign-in error:', error);
-      const errorMessage = error.message || 'Google sign-in failed. Please try again.';
+      console.error('Google sign-in error details:', {
+        code: error.code,
+        message: error.message,
+        email: error.email,
+        credential: error.credential,
+        timestamp: new Date().toISOString()
+      });
+      
+      let errorMessage = 'Google sign-in failed. Please try again.';
+      
+      // Handle specific Google auth errors
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        errorMessage = 'An account already exists with the same email but different sign-in method. Please sign in using your email and password.';
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in popup was closed before completing. Please try again.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = 'Sign-in was cancelled. Please try again.';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Sign-in popup was blocked. Please allow popups for this site and try again.';
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = 'Google sign-in is not enabled. Please contact support.';
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
       return { success: false, error: errorMessage };
@@ -288,7 +390,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loginWithGoogle,
-    updateProfile,
+    updateProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -301,3 +403,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default AuthProvider;

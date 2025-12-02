@@ -11,10 +11,84 @@ import {
   CardActions,
   CircularProgress,
   Alert,
-  Snackbar
+  Snackbar,
+  IconButton,
+  Tooltip,
+  Paper
 } from '@mui/material';
-import { FiPlus, FiMap, FiCalendar, FiUsers, FiEdit2, FiTrash2, FiAlertCircle } from 'react-icons/fi';
+import { styled } from '@mui/material/styles';
+import { 
+  FiPlus, 
+  FiCalendar, 
+  FiUsers, 
+  FiEdit2, 
+  FiTrash2, 
+  FiAlertCircle, 
+  FiFileText,
+  FiMapPin,
+  FiEye
+} from 'react-icons/fi';
 import { useItinerary } from '../../context/ItineraryContext';
+
+// Styled Components
+const StyledCard = styled(Card)(({ theme }) => ({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: theme.shadows[8],
+  },
+}));
+
+const StyledCardContent = styled(CardContent)(({ theme }) => ({
+  flexGrow: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(1),
+  cursor: 'pointer',
+  '&:last-child': {
+    paddingBottom: theme.spacing(2),
+  },
+}));
+
+const TripTitle = styled(Typography)({
+  fontWeight: 500,
+  marginBottom: '8px',
+});
+
+const TripMeta = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  color: theme.palette.text.secondary,
+  marginBottom: '4px',
+  '& svg': {
+    fontSize: '1rem',
+  },
+}));
+
+const ActionButtons = styled(CardActions)(({ theme }) => ({
+  padding: theme.spacing(2),
+  justifyContent: 'space-between',
+  borderTop: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
+}));
+
+const LoadingContainer = styled(Box)({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '60vh',
+});
+
+const EmptyState = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+  width: '100%',
+}));
 
 const ItineraryList = () => {
   const navigate = useNavigate();
@@ -44,9 +118,9 @@ const ItineraryList = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+      <LoadingContainer>
         <CircularProgress />
-      </Box>
+      </LoadingContainer>
     );
   }
 
@@ -69,6 +143,7 @@ const ItineraryList = () => {
           color="primary" 
           startIcon={<FiPlus />}
           onClick={() => navigate('/itinerary/create')}
+          sx={{ textTransform: 'none' }}
         >
           Create New Itinerary
         </Button>
@@ -77,92 +152,101 @@ const ItineraryList = () => {
       <Grid container spacing={3}>
         {trips && trips.length > 0 ? (
           trips.map((trip) => (
-            <Grid item xs={12} sm={6} md={4} key={trip.id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  '&:hover': {
-                    boxShadow: 6,
-                    transform: 'translateY(-2px)',
-                    transition: 'all 0.3s ease-in-out'
-                  }
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate(`/itinerary/${trip.id}`)}>
-                  <Typography variant="h6" component="h2" gutterBottom>
+            <Grid item xs={12} sm={6} lg={4} key={trip.id}>
+              <StyledCard>
+                <StyledCardContent onClick={() => navigate(`/itinerary/${trip.id}`)}>
+                  <TripTitle variant="h6" component="h2">
                     {trip.title || 'Untitled Trip'}
-                  </Typography>
+                  </TripTitle>
+                  
                   {trip.destination && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <FiMap style={{ marginRight: 8 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {trip.destination}
-                      </Typography>
-                    </Box>
+                    <TripMeta>
+                      <FiMapPin />
+                      <Typography variant="body2">{trip.destination}</Typography>
+                    </TripMeta>
                   )}
+                  
                   {trip.startDate && trip.endDate && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <FiCalendar style={{ marginRight: 8 }} />
-                      <Typography variant="body2" color="text.secondary">
+                    <TripMeta>
+                      <FiCalendar />
+                      <Typography variant="body2">
                         {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
                       </Typography>
-                    </Box>
+                    </TripMeta>
                   )}
-                  {trip.travelers && (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <FiUsers style={{ marginRight: 8 }} />
-                      <Typography variant="body2" color="text.secondary">
+                  
+                  {trip.travelers > 0 && (
+                    <TripMeta>
+                      <FiUsers />
+                      <Typography variant="body2">
                         {trip.travelers} {trip.travelers === 1 ? 'Traveler' : 'Travelers'}
                       </Typography>
-                    </Box>
+                    </TripMeta>
                   )}
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-                  <Button 
-                    size="small" 
-                    startIcon={<FiEdit2 />} 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/itinerary/${trip.id}/edit`);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button 
-                    size="small" 
-                    color="error" 
-                    startIcon={<FiTrash2 />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm('Are you sure you want to delete this trip?')) {
-                        handleDeleteTrip(trip.id);
-                      }
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </CardActions>
-              </Card>
+                </StyledCardContent>
+                
+                <ActionButtons>
+                  <Box>
+                    <Tooltip title="View Details">
+                      <IconButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/itinerary/${trip.id}`);
+                        }}
+                      >
+                        <FiEye />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit">
+                      <IconButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/itinerary/${trip.id}/edit`);
+                        }}
+                      >
+                        <FiEdit2 />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                  <Tooltip title="Delete">
+                    <IconButton 
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('Are you sure you want to delete this trip?')) {
+                          handleDeleteTrip(trip.id);
+                        }
+                      }}
+                    >
+                      <FiTrash2 />
+                    </IconButton>
+                  </Tooltip>
+                </ActionButtons>
+              </StyledCard>
             </Grid>
           ))
         ) : (
           <Grid item xs={12}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                No itineraries found. Create your first itinerary to get started!
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                startIcon={<FiPlus />}
-                onClick={() => navigate('/itinerary/create')}
-                sx={{ mt: 2 }}
-              >
-                Create New Itinerary
-              </Button>
-            </Box>
+            <EmptyState elevation={0}>
+              <Box py={4}>
+                <FiFileText size={48} style={{ marginBottom: 16, opacity: 0.5 }} />
+                <Typography variant="h6" gutterBottom>
+                  No itineraries found
+                </Typography>
+                <Typography variant="body1" color="textSecondary" paragraph>
+                  Get started by creating your first travel itinerary
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  startIcon={<FiPlus />}
+                  onClick={() => navigate('/itinerary/create')}
+                  sx={{ mt: 2, textTransform: 'none' }}
+                >
+                  Create Your First Itinerary
+                </Button>
+              </Box>
+            </EmptyState>
           </Grid>
         )}
       </Grid>
@@ -173,7 +257,11 @@ const ItineraryList = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
