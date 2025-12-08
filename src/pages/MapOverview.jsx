@@ -21,7 +21,7 @@ const MapOverview = () => {
       try {
         // In a real app, you would use your actual Google Maps API key
         const loader = new Loader({
-          apiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+          apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
           version: 'weekly',
           libraries: ['places']
         });

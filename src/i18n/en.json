@@ -51,7 +51,10 @@
     "view": "View",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "date": "Date",
+    "description": "Description",
+    "optional": "(optional)"
   },
   "footer": {
     "rights": " 2023 Travel Itinerary Planner. All rights reserved."
@@ -96,6 +99,7 @@
   },
   "expenses": {
     "addExpense": "Add Expense",
+    "addNewExpense": "Add New Expense",
     "expenseName": "Expense Name",
     "amount": "Amount",
     "category": "Category",
@@ -105,14 +109,36 @@
     "budget": "Budget",
     "remaining": "Remaining",
     "spent": "Spent",
-    "categories": {
-      "transport": "Transport",
-      "accommodation": "Accommodation",
-      "food": "Food",
-      "activities": "Activities",
-      "shopping": "Shopping",
-      "other": "Other"
-    }
+    "receipt": "Receipt",
+    "uploadReceipt": "Upload Receipt",
+    "spendingOverview": "Spending Overview",
+    "spendingOverTime": "Spending Over Time",
+    "timeRanges": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "totalSpending": "Total Spending",
+    "increaseFromLastPeriod": "vs last period",
+    "spendingByCategory": "Spending by Category",
+    "noSpendingData": "No spending data available",
+    "addExpensesToSeeBreakdown": "Add expenses to see the breakdown",
+    "expenses": "Expenses",
+    "totalExpenses": "Total Expenses",
+    "averagePerDay": "Average per day",
+    "allCategories": "All Categories",
+    "noExpenseData": "No expense data available",
+    "addExpensesToSeeCharts": "Add expenses to see the charts",
+    "manageCategoriesDescription": "Manage your expense categories",
+    "categories.food": "🍔 Food & Drinks",
+    "categories.accommodation": "🏨 Accommodation",
+    "categories.transport": "🚗 Transportation",
+    "categories.activities": "🎡 Activities",
+    "categories.shopping": "🛍️ Shopping",
+    "categories.sightseeing": "🏛️ Sightseeing",
+    "categories.health": "🏥 Health",
+    "categories.other": "📌 Other",
+    "addCategory": "Add Category"
   },
   "packing": {
     "addItem": "Add Item",

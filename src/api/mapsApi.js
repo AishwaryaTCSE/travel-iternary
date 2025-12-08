@@ -31,6 +31,20 @@ export const geocodeAddress = async (address) => {
         const { lat, lng } = results[0].geometry.location;
         return { lat, lng, address: results[0].formatted_address };
       }
+      // Fallback to Mapbox if Google returns no results and Mapbox token is available
+      if (MAPBOX_ACCESS_TOKEN) {
+        const fallback = await axios.get(
+          `${MAPBOX_BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`,
+          {
+            params: { types: 'address,place,locality,neighborhood,region', limit: 1, access_token: MAPBOX_ACCESS_TOKEN },
+          }
+        );
+        const { features } = fallback.data;
+        if (features && features.length > 0) {
+          const [lng, lat] = features[0].center;
+          return { lat, lng, address: features[0].place_name };
+        }
+      }
     } else {
       // Mapbox geocoding
       response = await mapsClient.get(`/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`, {
@@ -50,6 +64,24 @@ export const geocodeAddress = async (address) => {
     throw new Error('No results found for the given address');
   } catch (error) {
     console.error('Error geocoding address:', error);
+    // Try Mapbox as a final fallback when Google fails and token exists
+    if (useGoogleMaps && MAPBOX_ACCESS_TOKEN) {
+      try {
+        const fallback = await axios.get(
+          `${MAPBOX_BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`,
+          {
+            params: { types: 'address,place,locality,neighborhood,region', limit: 1, access_token: MAPBOX_ACCESS_TOKEN },
+          }
+        );
+        const { features } = fallback.data;
+        if (features && features.length > 0) {
+          const [lng, lat] = features[0].center;
+          return { lat, lng, address: features[0].place_name };
+        }
+      } catch (_) {
+        // Ignore and rethrow original error
+      }
+    }
     throw error;
   }
 };

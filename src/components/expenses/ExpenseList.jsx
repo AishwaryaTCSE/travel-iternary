@@ -7,12 +7,13 @@ import ExpenseForm from './ExpenseForm';
 const ExpenseList = ({
   expenses = [],
   categories = [],
-  onAddExpense,
-  onUpdateExpense,
-  onDeleteExpense,
-  onViewReceipt,
+  onAddExpense = (expense) => console.warn('onAddExpense not provided to ExpenseList', expense),
+  onUpdateExpense = (expense) => console.warn('onUpdateExpense not provided to ExpenseList', expense),
+  onDeleteExpense = (id) => console.warn('onDeleteExpense not provided to ExpenseList', id),
+  onViewReceipt = (url) => window.open(url, '_blank'),
   currency = 'USD',
-  isLoading = false
+  isLoading = false,
+  tripId
 }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,13 +40,26 @@ const ExpenseList = ({
   ];
 
   const handleSubmit = (expenseData) => {
-    if (editingExpense) {
-      onUpdateExpense(expenseData);
-    } else {
-      onAddExpense(expenseData);
+    try {
+      const expenseWithTripId = { ...expenseData, tripId };
+      if (editingExpense) {
+        if (typeof onUpdateExpense === 'function') {
+          onUpdateExpense(expenseWithTripId);
+        } else {
+          console.error('onUpdateExpense is not a function');
+        }
+      } else {
+        if (typeof onAddExpense === 'function') {
+          onAddExpense(expenseWithTripId);
+        } else {
+          console.error('onAddExpense is not a function');
+        }
+      }
+      setIsFormOpen(false);
+      setEditingExpense(null);
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
     }
-    setIsFormOpen(false);
-    setEditingExpense(null);
   };
 
   const handleEdit = (expense) => {
@@ -168,7 +182,15 @@ const ExpenseList = ({
             <ExpenseForm
               expense={editingExpense}
               categories={categories}
-              onSubmit={handleSubmit}
+              onSubmit={(expenseData) => {
+                if (typeof handleSubmit === 'function') {
+                  handleSubmit(expenseData);
+                } else if (editingExpense) {
+                  onUpdateExpense(expenseData);
+                } else {
+                  onAddExpense(expenseData);
+                }
+              }}
               onCancel={() => {
                 setIsFormOpen(false);
                 setEditingExpense(null);

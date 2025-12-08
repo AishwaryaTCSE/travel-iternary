@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { FiDollarSign, FiCalendar, FiTag, FiPlus, FiX, FiSave } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 
-const ExpenseForm = ({ expense, onSubmit, onCancel, categories = [] }) => {
+const ExpenseForm = ({ 
+  expense, 
+  onSubmit = () => console.warn('onSubmit handler not provided to ExpenseForm'), 
+  onCancel = () => console.warn('onCancel handler not provided to ExpenseForm'), 
+  categories = [] 
+}) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     id: '',
@@ -46,11 +51,15 @@ const ExpenseForm = ({ expense, onSubmit, onCancel, categories = [] }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      amount: parseFloat(formData.amount),
-      date: new Date(formData.date).toISOString()
-    });
+    if (typeof onSubmit === 'function') {
+      onSubmit({
+        ...formData,
+        amount: parseFloat(formData.amount) || 0,
+        date: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString()
+      });
+    } else {
+      console.error('onSubmit is not a function', { onSubmit });
+    }
   };
 
   return (

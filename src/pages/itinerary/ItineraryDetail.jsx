@@ -64,6 +64,11 @@ const ItineraryDetail = () => {
   const [error, setError] = useState(null);
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
+  const [expenses, setExpenses] = useState(() => {
+    // Initialize expenses from the current trip if available
+    const foundTrip = trips.find(t => t.id === (id || tripId));
+    return foundTrip?.expenses || [];
+  });
   
   // Update tab value when URL changes
   useEffect(() => {
@@ -100,6 +105,10 @@ const ItineraryDetail = () => {
       const foundTrip = trips.find(t => t.id === detailId);
       if (foundTrip) {
         setItinerary(foundTrip);
+        // Update expenses when the trip data changes
+        if (foundTrip.expenses) {
+          setExpenses(foundTrip.expenses);
+        }
       }
     }
   }, [trips, detailId]);
@@ -423,7 +432,65 @@ const ItineraryDetail = () => {
       {tabValue === 'expenses' && (
         <Box>
           <ExpenseSummary tripId={detailId} />
-          <ExpenseList tripId={detailId} />
+          <ExpenseList 
+            tripId={detailId}
+            expenses={expenses}
+            onAddExpense={(newExpense) => {
+              const updatedExpenses = [...expenses, { 
+                ...newExpense, 
+                id: Date.now().toString(),
+                date: new Date().toISOString() // Ensure date is in correct format
+              }];
+              setExpenses(updatedExpenses);
+              
+              // Update the trip with the new expenses
+              const updatedTrip = {
+                ...itinerary,
+                expenses: updatedExpenses
+              };
+              updateTrip(detailId, updatedTrip);
+            }}
+            onUpdateExpense={(updatedExpense) => {
+              const updatedExpenses = expenses.map(exp => 
+                exp.id === updatedExpense.id ? updatedExpense : exp
+              );
+              setExpenses(updatedExpenses);
+              
+              // Update the trip with the updated expenses
+              const updatedTrip = {
+                ...itinerary,
+                expenses: updatedExpenses
+              };
+              updateTrip(detailId, updatedTrip);
+            }}
+            onDeleteExpense={(expenseId) => {
+              const updatedExpenses = expenses.filter(exp => exp.id !== expenseId);
+              setExpenses(updatedExpenses);
+              
+              // Update the trip with the filtered expenses
+              const updatedTrip = {
+                ...itinerary,
+                expenses: updatedExpenses
+              };
+              updateTrip(detailId, updatedTrip);
+            }}
+            onViewReceipt={(receiptUrl) => {
+              if (receiptUrl) {
+                window.open(receiptUrl, '_blank');
+              }
+            }}
+            currency="USD"
+            categories={[
+              { value: 'food', label: '🍔 Food & Drinks' },
+              { value: 'accommodation', label: '🏨 Accommodation' },
+              { value: 'transport', label: '🚗 Transportation' },
+              { value: 'activities', label: '🎡 Activities' },
+              { value: 'shopping', label: '🛍️ Shopping' },
+              { value: 'sightseeing', label: '🏛️ Sightseeing' },
+              { value: 'health', label: '🏥 Health' },
+              { value: 'other', label: '📌 Other' }
+            ]}
+          />
         </Box>
       )}
 

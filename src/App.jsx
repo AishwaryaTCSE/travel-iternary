@@ -203,7 +203,7 @@ function App() {
   useEffect(() => {
     const FOURSQUARE_API_KEY = import.meta.env.VITE_FOURSQUARE_API_KEY;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || import.meta.env.VITE_WEATHER_API_KEY;
     
     // Only show warning in development mode
     if (import.meta.env.DEV) {

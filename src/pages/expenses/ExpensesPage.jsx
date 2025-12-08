@@ -23,10 +23,12 @@ import {
   ExpenseChart, 
   ExpenseCategories 
 } from '../../components/expenses';
+import { useTranslation } from 'react-i18next';
 
 const ExpensesPage = () => {
   const { tripId } = useParams();
   const theme = useTheme();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { getTripById, updateTrip } = useItinerary();
   
@@ -37,6 +39,18 @@ const ExpensesPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [error, setError] = useState(null);
+  const [timeRange, setTimeRange] = useState('month');
+
+  // Unified categories used across form, list, charts, and summary
+  const categories = [
+    { value: 'food', label: t('expenses.categories.food'), color: '#FF6B6B' },
+    { value: 'accommodation', label: t('expenses.categories.accommodation'), color: '#4D96FF' },
+    { value: 'transport', label: t('expenses.categories.transport'), color: '#6BCB77' },
+    { value: 'activities', label: t('expenses.categories.activities'), color: '#FFD93D' },
+    { value: 'shopping', label: t('expenses.categories.shopping'), color: '#A55EEA' },
+    { value: 'sightseeing', label: t('expenses.categories.sightseeing'), color: '#FF9F1C' },
+    { value: 'other', label: t('expenses.categories.other'), color: '#A5B4C0' }
+  ];
 
   // Load trip and expenses
   useEffect(() => {
@@ -206,7 +220,12 @@ const ExpensesPage = () => {
 
         {/* Summary Section */}
         <Box sx={{ mb: 4 }}>
-          <ExpenseSummary expenses={expenses} />
+          <ExpenseSummary 
+            expenses={expenses}
+            categories={categories}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+          />
         </Box>
 
         <Grid container spacing={3}>
@@ -215,6 +234,7 @@ const ExpensesPage = () => {
             <Paper sx={{ p: 2, mb: 3 }}>
               <ExpenseList 
                 expenses={expenses}
+                categories={categories}
                 onEdit={handleEditExpense}
                 onDelete={handleDeleteExpense}
               />
@@ -224,10 +244,16 @@ const ExpensesPage = () => {
           {/* Charts and Categories */}
           <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2, mb: 3 }}>
-              <ExpenseChart expenses={expenses} />
+              <ExpenseChart expenses={expenses} categories={categories} />
             </Paper>
             <Paper sx={{ p: 2 }}>
-              <ExpenseCategories expenses={expenses} />
+              <ExpenseCategories 
+                onChange={(updated) => {
+                  if (trip) {
+                    updateTrip(trip.id, { categories: updated });
+                  }
+                }}
+              />
             </Paper>
           </Grid>
         </Grid>
@@ -239,7 +265,8 @@ const ExpensesPage = () => {
         <DialogContent>
           <ExpenseForm 
             expense={editingExpense}
-            onSave={handleSaveExpense}
+            categories={categories}
+            onSubmit={handleSaveExpense}
             onCancel={handleCloseForm}
           />
         </DialogContent>
