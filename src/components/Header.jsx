@@ -47,10 +47,14 @@ const Header = () => {
 
   const resolvePath = (item) => {
     const tripId = currentTrip?.id;
-    if (item.base === 'dashboard') return '/dashboard';
+    // Dashboard/Home: main itinerary list page
+    if (item.base === 'dashboard') return '/';
+    // Itinerary list
     if (item.base === 'itinerary') return '/itinerary';
+    // Map supports both, prefer trip-specific when available
     if (item.base === 'map') return tripId ? `/map/${tripId}` : '/map';
-    if (item.requiresTrip) return tripId ? `/${item.base}/${tripId}` : `/${item.base}`;
+    // Features that require a trip; fall back to itinerary list when none selected
+    if (item.requiresTrip) return tripId ? `/${item.base}/${tripId}` : '/itinerary';
     return `/${item.base}`;
   };
 
@@ -89,7 +93,7 @@ const Header = () => {
           <Typography
             variant="h6"
             component={Link}
-            to="/"
+            to="/itinerary"
             sx={{
               textDecoration: 'none',
               color: 'text.primary',

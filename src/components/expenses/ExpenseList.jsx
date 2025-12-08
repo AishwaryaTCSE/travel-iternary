@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiFilter, FiSearch, FiPlus } from 'react-icons/fi';
+import { FiFilter, FiSearch, FiPlus, FiDollarSign } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import ExpenseItem from './ExpenseItem';
 import ExpenseForm from './ExpenseForm';

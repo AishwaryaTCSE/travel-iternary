@@ -6,6 +6,7 @@ import * as weather from './weatherApi';
 import * as places from './placesApi';
 import maps from './mapsApi';
 import expense from './expenseApi';
+import * as flights from './flightsApi';
 
 // Re-export all API modules
 export * from './auth';
@@ -13,6 +14,7 @@ export * from './weatherApi';
 export * from './placesApi';
 export * from './mapsApi';
 export * from './expenseApi';
+export * from './flightsApi';
 
 // Unified API object
 const api = {
@@ -21,7 +23,8 @@ const api = {
   weather,
   places,
   maps,
-  expense
+  expense,
+  flights
 };
 
 export default api;

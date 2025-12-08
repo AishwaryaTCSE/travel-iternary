@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useItinerary } from '../../context/ItineraryContext';
 import { 
   Box, 
   Typography, 
@@ -11,7 +12,12 @@ import {
   Tab, 
   Divider, 
   Chip,
-  IconButton
+  IconButton,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent
 } from '@mui/material';
 import { 
   FiArrowLeft, 
@@ -20,50 +26,144 @@ import {
   FiMapPin, 
   FiCalendar, 
   FiUsers, 
-  FiInfo,
+  FiDollarSign,
+  FiPlus,
+  FiMap,
+  FiSun,
+  FiPackage,
+  FiFileText,
+  FiNavigation,
   FiClock,
-  FiDollarSign
+  FiDollarSign as FiCurrency
 } from 'react-icons/fi';
+
+// Import components
+import EnhancedMapView from '../../components/maps/EnhancedMapView';
+import PlacesMap from '../../components/places/PlacesMap';
+import Weather from '../../components/weather/Weather';
+import Flights from '../../components/flights/Flights';
+import CurrencyConverter from '../../components/currency/CurrencyConverter';
+import SmartPackingList from '../../components/packing/SmartPackingList';
+import DocumentChecklist from '../../components/documents/DocumentChecklist';
+import TripRecommendations from '../../components/recommendations/TripRecommendations';
+import { ExpenseList, ExpenseSummary } from '../../components/expenses';
+import ActivityForm from '../../components/itinerary/ActivityForm';
 
 const ItineraryDetail = () => {
   const { id, tripId } = useParams();
   const detailId = id || tripId;
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') || 'overview';
+  
+  const { trips, deleteTrip, updateTrip, addActivity, updateActivity, deleteActivity } = useItinerary();
+  const [tabValue, setTabValue] = useState(tabParam);
+  const [itinerary, setItinerary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showActivityForm, setShowActivityForm] = useState(false);
+  const [editingActivity, setEditingActivity] = useState(null);
+  
+  // Update tab value when URL changes
+  useEffect(() => {
+    setTabValue(tabParam);
+  }, [tabParam]);
 
-  // Mock data - replace with actual data fetching
-  const itinerary = {
-    id: detailId,
-    title: 'Summer Vacation 2023',
-    destination: 'Bali, Indonesia',
-    startDate: '2023-07-15',
-    endDate: '2023-07-25',
-    description: 'A relaxing vacation exploring the beautiful beaches and culture of Bali.',
-    travelers: 2,
-    budget: 2500,
-    status: 'upcoming',
-    activities: [
-      { id: 1, day: 1, title: 'Arrival in Denpasar', time: '14:00', location: 'Ngurah Rai International Airport' },
-      { id: 2, day: 2, title: 'Ubud Tour', time: '09:00', location: 'Ubud' },
-    ]
-  };
+  useEffect(() => {
+    const loadItinerary = () => {
+      try {
+        setLoading(true);
+        const foundTrip = trips.find(t => t.id === detailId);
+        
+        if (!foundTrip) {
+          setError('Itinerary not found');
+          return;
+        }
+        
+        setItinerary(foundTrip);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load itinerary');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadItinerary();
+  }, [detailId, trips]);
+
+  // Reload itinerary after CRUD operations
+  useEffect(() => {
+    if (trips.length > 0) {
+      const foundTrip = trips.find(t => t.id === detailId);
+      if (foundTrip) {
+        setItinerary(foundTrip);
+      }
+    }
+  }, [trips, detailId]);
 
   const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+    setSearchParams({ tab: newValue });
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate('/itinerary');
   };
 
   const handleEdit = () => {
-    navigate(`/itinerary/edit/${detailId}`);
+    navigate(`/itinerary/create?id=${detailId}`);
   };
 
   const handleDelete = () => {
-    // Implement delete functionality
-    console.log('Delete itinerary', id);
+    if (window.confirm('Are you sure you want to delete this itinerary?')) {
+      deleteTrip(detailId);
+      navigate('/itinerary');
+    }
   };
+
+  const handleSaveActivity = (activityData) => {
+    if (editingActivity) {
+      updateActivity(detailId, editingActivity.id, activityData);
+    } else {
+      addActivity(detailId, activityData);
+    }
+    setShowActivityForm(false);
+    setEditingActivity(null);
+  };
+
+  const handleEditActivity = (activity) => {
+    setEditingActivity(activity);
+    setShowActivityForm(true);
+  };
+
+  const handleDeleteActivity = (activityId) => {
+    if (window.confirm('Are you sure you want to delete this activity?')) {
+      deleteActivity(detailId, activityId);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error || !itinerary) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error || 'Itinerary not found'}
+        </Alert>
+        <Button startIcon={<FiArrowLeft />} onClick={handleBack}>
+          Back to Itineraries
+        </Button>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -79,7 +179,7 @@ const ItineraryDetail = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
           <Box>
             <Typography variant="h4" component="h1" gutterBottom>
-              {itinerary.title}
+              {itinerary.title || itinerary.name || 'Untitled Trip'}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
               <Chip 
@@ -88,25 +188,31 @@ const ItineraryDetail = () => {
                 variant="outlined" 
                 size="small"
               />
-              <Chip 
-                icon={<FiCalendar size={16} />} 
-                label={`${new Date(itinerary.startDate).toLocaleDateString()} - ${new Date(itinerary.endDate).toLocaleDateString()}`} 
-                variant="outlined" 
-                size="small"
-              />
-              <Chip 
-                icon={<FiUsers size={16} />} 
-                label={`${itinerary.travelers} ${itinerary.travelers === 1 ? 'Traveler' : 'Travelers'}`} 
-                variant="outlined" 
-                size="small"
-              />
-              <Chip 
-                icon={<FiDollarSign size={16} />} 
-                label={`$${itinerary.budget}`} 
-                color="primary" 
-                variant="outlined" 
-                size="small"
-              />
+              {itinerary.startDate && itinerary.endDate && (
+                <Chip 
+                  icon={<FiCalendar size={16} />} 
+                  label={`${new Date(itinerary.startDate).toLocaleDateString()} - ${new Date(itinerary.endDate).toLocaleDateString()}`} 
+                  variant="outlined" 
+                  size="small"
+                />
+              )}
+              {itinerary.travelers && (
+                <Chip 
+                  icon={<FiUsers size={16} />} 
+                  label={`${itinerary.travelers} ${itinerary.travelers === 1 ? 'Traveler' : 'Travelers'}`} 
+                  variant="outlined" 
+                  size="small"
+                />
+              )}
+              {itinerary.budget && (
+                <Chip 
+                  icon={<FiDollarSign size={16} />} 
+                  label={`$${itinerary.budget}`} 
+                  color="primary" 
+                  variant="outlined" 
+                  size="small"
+                />
+              )}
             </Box>
           </Box>
           <Box>
@@ -119,121 +225,240 @@ const ItineraryDetail = () => {
           </Box>
         </Box>
 
-        <Paper sx={{ mb: 3, p: 3 }}>
-          <Typography variant="h6" gutterBottom>About This Trip</Typography>
-          <Typography variant="body1" color="text.secondary" paragraph>
-            {itinerary.description}
-          </Typography>
-        </Paper>
+        {itinerary.description && (
+          <Paper sx={{ mb: 3, p: 3 }}>
+            <Typography variant="h6" gutterBottom>About This Trip</Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              {itinerary.description}
+            </Typography>
+          </Paper>
+        )}
 
         <Tabs 
-          value={tabValue} 
+          value={tabValue}
           onChange={handleTabChange} 
           sx={{ mb: 3 }}
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label="Overview" />
-          <Tab label="Activities" />
-          <Tab label="Accommodations" />
-          <Tab label="Transportation" />
-          <Tab label="Expenses" />
-          <Tab label="Packing List" />
+          <Tab value="overview" icon={<FiMapPin />} label="Overview" iconPosition="start" />
+          <Tab value="map" icon={<FiMap />} label="Map" iconPosition="start" />
+          <Tab value="weather" icon={<FiSun />} label="Weather" iconPosition="start" />
+          <Tab value="expenses" icon={<FiDollarSign />} label="Expenses" iconPosition="start" />
+          <Tab value="packing" icon={<FiPackage />} label="Packing" iconPosition="start" />
+          <Tab value="documents" icon={<FiFileText />} label="Documents" iconPosition="start" />
+          <Tab value="flights" icon={<FiNavigation />} label="Flights" iconPosition="start" />
+          <Tab value="currency" icon={<FiCurrency />} label="Currency" iconPosition="start" />
         </Tabs>
 
-        <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: 3 }} />
 
-        {tabValue === 0 && (
-          <Box>
-            <Typography variant="h6" gutterBottom>Upcoming Activities</Typography>
-            {itinerary.activities.slice(0, 3).map(activity => (
-              <Paper key={activity.id} sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ textAlign: 'center', minWidth: 60 }}>
-                    <Typography variant="subtitle2">Day {activity.day}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {activity.time}
+      {/* Overview Tab */}
+      {tabValue === 'overview' && (
+        <Box>
+          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>Trip Overview</Typography>
+          
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+                  Trip Details
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>Destination:</strong> {itinerary.destination}
+                  </Typography>
+                  {itinerary.startDate && (
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Start Date:</strong> {new Date(itinerary.startDate).toLocaleDateString()}
                     </Typography>
-                  </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1">{activity.title}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                      <FiMapPin size={14} style={{ marginRight: 4 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {activity.location}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Button size="small" variant="outlined">View Details</Button>
+                  )}
+                  {itinerary.endDate && (
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>End Date:</strong> {new Date(itinerary.endDate).toLocaleDateString()}
+                    </Typography>
+                  )}
+                  {itinerary.travelers && (
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Travelers:</strong> {itinerary.travelers}
+                    </Typography>
+                  )}
+                  {itinerary.budget && (
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Budget:</strong> ${itinerary.budget}
+                    </Typography>
+                  )}
                 </Box>
               </Paper>
-            ))}
-            <Button 
-              fullWidth 
-              variant="text" 
-              sx={{ mt: 1 }}
-              onClick={() => setTabValue(1)}
-            >
-              View All Activities
-            </Button>
-          </Box>
-        )}
+            </Grid>
 
-        {tabValue === 1 && (
-          <Box>
-            <Typography variant="h6" gutterBottom>Activities</Typography>
-            {itinerary.activities.map(activity => (
-              <Paper key={activity.id} sx={{ p: 2, mb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ textAlign: 'center', minWidth: 60 }}>
-                    <Typography variant="subtitle2">Day {activity.day}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {activity.time}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1">{activity.title}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                      <FiMapPin size={14} style={{ marginRight: 4 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {activity.location}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Button size="small" variant="outlined">View Details</Button>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Activities ({itinerary.activities?.length || 0})
+                  </Typography>
+                  <Button 
+                    size="small" 
+                    variant="contained"
+                    startIcon={<FiPlus />}
+                    onClick={() => {
+                      setEditingActivity(null);
+                      setShowActivityForm(true);
+                    }}
+                  >
+                    Add Activity
+                  </Button>
                 </Box>
-              </Paper>
-            ))}
-            <Button 
-              variant="contained" 
-              startIcon={<FiPlus />}
-              sx={{ mt: 2 }}
-            >
-              Add Activity
-            </Button>
-          </Box>
-        )}
+                
+                {showActivityForm && (
+                  <Box sx={{ mb: 2 }}>
+                    <ActivityForm
+                      initialData={editingActivity || {}}
+                      onSave={handleSaveActivity}
+                      onCancel={() => {
+                        setShowActivityForm(false);
+                        setEditingActivity(null);
+                      }}
+                      onDelete={editingActivity ? () => handleDeleteActivity(editingActivity.id) : null}
+                      isEdit={!!editingActivity}
+                    />
+                  </Box>
+                )}
 
-        {tabValue !== 0 && tabValue !== 1 && (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Box sx={{ fontSize: 48, mb: 2, opacity: 0.5 }}>
-              {tabValue === 2 && '🏨'}
-              {tabValue === 3 && '🚗'}
-              {tabValue === 4 && '💰'}
-              {tabValue === 5 && '🧳'}
-            </Box>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              {tabValue === 2 && 'No Accommodations Added'}
-              {tabValue === 3 && 'No Transportation Added'}
-              {tabValue === 4 && 'No Expenses Tracked'}
-              {tabValue === 5 && 'Packing List is Empty'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              This section is coming soon!
-            </Typography>
-            <Button variant="outlined">Add New</Button>
-          </Box>
-        )}
+                {itinerary.activities && itinerary.activities.length > 0 ? (
+                  <Box sx={{ mt: 1 }}>
+                    {itinerary.activities.map((activity, index) => (
+                      <Paper 
+                        key={activity.id || index} 
+                        sx={{ mb: 1, p: 1.5, bgcolor: 'action.hover', borderRadius: 1, '&:hover': { bgcolor: 'action.selected' } }}
+                      >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" fontWeight="medium">
+                              {activity.title || activity.name}
+                            </Typography>
+                            {activity.location && (
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                <FiMapPin size={12} style={{ marginRight: 4 }} />
+                                {activity.location}
+                              </Typography>
+                            )}
+                            {activity.time && (
+                              <Typography variant="caption" color="text.secondary" display="block">
+                                <FiClock size={12} style={{ marginRight: 4 }} />
+                                {activity.time}
+                              </Typography>
+                            )}
+                            {activity.description && (
+                              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                                {activity.description}
+                              </Typography>
+                            )}
+                          </Box>
+                          <Box>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handleEditActivity(activity)}
+                              sx={{ mr: 0.5 }}
+                            >
+                              <FiEdit2 size={16} />
+                            </IconButton>
+                            <IconButton 
+                              size="small" 
+                              color="error"
+                              onClick={() => handleDeleteActivity(activity.id)}
+                            >
+                              <FiTrash2 size={16} />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                    No activities yet. Click "Add Activity" to get started.
+                  </Typography>
+                )}
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
+      {/* Packing List Tab - Smart packing based on weather and destination */}
+      {tabValue === 'packing' && (
+        <Box>
+          <SmartPackingList
+            destination={itinerary.destination}
+            startDate={itinerary.startDate}
+            endDate={itinerary.endDate}
+            travelers={itinerary.travelers || 1}
+          />
+        </Box>
+      )}
+
+      {/* Map Tab */}
+      {tabValue === 'map' && (
+        <Box>
+          <EnhancedMapView
+            itinerary={itinerary}
+          />
+        </Box>
+      )}
+
+      {/* Weather Tab */}
+      {tabValue === 'weather' && (
+        <Box>
+          <Weather
+            destination={itinerary.destination}
+            startDate={itinerary.startDate}
+            endDate={itinerary.endDate}
+          />
+        </Box>
+      )}
+
+      {/* Expenses Tab */}
+      {tabValue === 'expenses' && (
+        <Box>
+          <ExpenseSummary tripId={detailId} />
+          <ExpenseList tripId={detailId} />
+        </Box>
+      )}
+
+      {/* Documents Tab - Checklist based on destination */}
+      {tabValue === 'documents' && (
+        <Box>
+          <DocumentChecklist
+            destination={itinerary.destination}
+            startDate={itinerary.startDate}
+            endDate={itinerary.endDate}
+          />
+        </Box>
+      )}
+
+      {/* Flights Tab */}
+      {tabValue === 'flights' && (
+        <Box>
+          <Flights
+            tripId={detailId}
+            destination={itinerary.destination}
+            startDate={itinerary.startDate}
+            endDate={itinerary.endDate}
+          />
+        </Box>
+      )}
+
+      {/* Currency Tab */}
+      {tabValue === 'currency' && (
+        <Box>
+          <CurrencyConverter
+            destination={itinerary.destination}
+            baseCurrency="USD"
+          />
+        </Box>
+      )}
       </Box>
     </Container>
   );

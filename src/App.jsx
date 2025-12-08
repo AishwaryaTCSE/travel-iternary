@@ -1,8 +1,20 @@
+/**
+ * Main App Component
+ * 
+ * Features:
+ * - Enhanced Map View with real-time places and recommendations
+ * - API integration for Foursquare/Google Maps Places
+ * - Smart recommendations based on itinerary activities
+ * - Error boundary for graceful error handling
+ * - Environment variable validation
+ * 
+ * See ENV_SETUP.md for API key configuration
+ */
+
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, Link as RouterLink, useNavigate, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from './context/ThemeContext';
-import { useItinerary } from './context/ItineraryContext';
 import { useAuth } from './context/AuthContext';
 import Header from './components/Header';
 import { ToastContainer } from 'react-toastify';
@@ -50,6 +62,7 @@ const ExpensesPage = lazy(() => import('./pages/expenses/ExpensesPage'));
 // const SimpleExpenses = lazy(() => import('./pages/expenses/SimpleExpenses'));
 const PackingList = lazy(() => import('./pages/packing/PackingList'));
 const MapView = lazy(() => import('./components/maps/MapView'));
+const GoogleMapsItineraryPage = lazy(() => import('./pages/GoogleMapsItineraryPage'));
 const Weather = lazy(() => import('./pages/weather/Weather'));
 const Documents = lazy(() => import('./pages/Documents'));
 const Booking = lazy(() => import('./pages/Booking'));
@@ -57,14 +70,21 @@ const Settings = lazy(() => import('./pages/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Loading component
-const LoadingSpinner = () => (
+const LoadingSpinner = ({ message }) => (
   <Box
     display="flex"
+    flexDirection="column"
     justifyContent="center"
     alignItems="center"
     minHeight="100vh"
+    gap={2}
   >
-    <CircularProgress />
+    <CircularProgress size={48} />
+    {message && (
+      <Typography variant="body2" color="text.secondary">
+        {message}
+      </Typography>
+    )}
   </Box>
 );
 
@@ -88,7 +108,7 @@ const ProtectedRoute = ({ children }) => {
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
   static getDerivedStateFromError(error) {
@@ -97,25 +117,47 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('Error caught by error boundary:', error, errorInfo);
+    this.setState({ errorInfo });
+    
+    // Log to error tracking service in production
+    if (import.meta.env.PROD) {
+      // You can integrate with error tracking services like Sentry here
+      // Example: Sentry.captureException(error, { contexts: { react: errorInfo } });
+    }
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Box sx={{ p: 3, textAlign: 'center', maxWidth: 600, mx: 'auto', mt: 4 }}>
           <Typography variant="h5" color="error" gutterBottom>
             Something went wrong
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Typography>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={() => window.location.reload()}
-          >
-            Reload Page
-          </Button>
+          {import.meta.env.DEV && this.state.errorInfo && (
+            <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', borderRadius: 1, textAlign: 'left' }}>
+              <Typography variant="caption" component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto' }}>
+                {this.state.errorInfo.componentStack}
+              </Typography>
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={() => window.location.reload()}
+            >
+              Reload Page
+            </Button>
+            <Button 
+              variant="outlined" 
+              onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
+            >
+              Try Again
+            </Button>
+          </Box>
         </Box>
       );
     }
@@ -124,24 +166,10 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Main Layout - Wraps protected routes with header and layout structure
+// Main Layout - Wraps routes with header and layout structure
+// Note: Made public to match frontend-only requirement from prompt
 const MainLayout = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
   const { theme: themeMode } = useTheme();
-
-  console.log('MainLayout - isAuthenticated:', isAuthenticated);
-  console.log('MainLayout - isLoading:', isLoading);
-
-  if (isLoading) {
-    console.log('MainLayout - Showing loading spinner');
-    return <LoadingSpinner />;
-  }
-
-  if (!isAuthenticated) {
-    console.log('MainLayout - Not authenticated, redirecting to login');
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
 
   return (
     <ErrorBoundary>
@@ -165,16 +193,44 @@ function App() {
   const location = useLocation();
   const { theme } = useTheme();
   const { isAuthenticated } = useAuth();
-  const { currentTrip } = useItinerary();
   
   // Update theme data attribute on theme change
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
   
-  // Debug log for route changes
+  // Check API keys configuration on mount
   useEffect(() => {
-    console.log('Current route:', location.pathname);
+    const FOURSQUARE_API_KEY = import.meta.env.VITE_FOURSQUARE_API_KEY;
+    const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    
+    // Only show warning in development mode
+    if (import.meta.env.DEV) {
+      const missingApis = [];
+      if (!FOURSQUARE_API_KEY && !GOOGLE_MAPS_API_KEY) {
+        missingApis.push('Foursquare or Google Maps API');
+      }
+      if (!OPENWEATHER_API_KEY) {
+        missingApis.push('OpenWeatherMap API');
+      }
+      
+      if (missingApis.length > 0) {
+        console.warn(
+          `⚠️ Missing API keys: ${missingApis.join(', ')}. ` +
+          `Some features may use fallback data. See ENV_SETUP.md for setup instructions.`
+        );
+      } else {
+        console.log('✅ API keys configured successfully');
+      }
+    }
+  }, []);
+  
+  // Debug log for route changes (only in development)
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('Current route:', location.pathname);
+    }
   }, [location]);
 
   return (
@@ -208,8 +264,12 @@ function App() {
           draggable
           pauseOnHover
           theme={theme === 'dark' ? 'dark' : 'light'}
+          toastStyle={{
+            borderRadius: '8px',
+            fontSize: '14px',
+          }}
         />
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -217,61 +277,50 @@ function App() {
             <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             
-            {/* Home Page - Accessible to all */}
-            <Route path="/" element={<Home />} />
-            
-            {/* Map Route - Accessible to all */}
-            <Route path="/map" element={
-              <ErrorBoundary>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <MapView />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-            
-            {/* Protected Routes - Wrapped in MainLayout */}
+            {/* Main Routes - Dashboard/Itinerary List as Home */}
             <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<Home />} />
-              <Route path="/profile" element={<Profile />} />
+              {/* Dashboard/Home - Shows itinerary cards */}
+              <Route path="/" element={<ItineraryList />} />
+              <Route path="/dashboard" element={<ItineraryList />} />
+              
+              {/* Itinerary Routes */}
               <Route path="/itinerary">
                 <Route index element={<ItineraryList />} />
                 <Route path="create" element={<ItineraryCreate />} />
                 <Route path=":tripId" element={<ItineraryDetail />} />
+                <Route path=":tripId/edit" element={<ItineraryCreate />} />
               </Route>
-              {/* Compatibility routes for legacy structure */}
+              
+              {/* Compatibility routes */}
               <Route path="/trip/:tripId">
                 <Route index element={<ItineraryDetail />} />
                 <Route path="itinerary" element={<ItineraryDetail />} />
               </Route>
-              {/* Expenses routes */}
+              
+              {/* Feature Routes - Can be accessed directly or via itinerary detail tabs */}
               <Route path="/expenses">
-                <Route index element={currentTrip ? <Navigate to={`/expenses/${currentTrip.id}`} replace /> : <ExpensesPage />} />
+                <Route index element={<Navigate to="/itinerary" replace />} />
                 <Route path=":tripId" element={<ExpensesPage />} />
               </Route>
-              
-              {/* Packing routes */}
-              <Route path="/packing">
-                <Route index element={currentTrip ? <Navigate to={`/packing/${currentTrip.id}`} replace /> : <PackingList />} />
-                <Route path=":tripId" element={<PackingList />} />
-              </Route>
-              
-              {/* Documents routes */}
-              <Route path="/documents">
-                <Route index element={currentTrip ? <Navigate to={`/documents/${currentTrip.id}`} replace /> : <Documents />} />
-                <Route path=":tripId" element={<Documents />} />
-              </Route>
-              
-              {/* Weather routes */}
+              <Route path="/packing/:tripId" element={<PackingList />} />
+              <Route path="/map/:tripId" element={<MapView />} />
               <Route path="/weather">
-                <Route index element={currentTrip ? <Navigate to={`/weather/${currentTrip.id}`} replace /> : <Weather />} />
+                <Route index element={<Navigate to="/itinerary" replace />} />
                 <Route path=":tripId" element={<Weather />} />
               </Route>
+              <Route path="/documents/:tripId" element={<Documents />} />
               
-              {/* Other routes */}
-              <Route path="/map/:tripId" element={<MapView />} />
+              {/* Map Routes - Enhanced map view with recommendations */}
+              <Route path="/map" element={<MapView />} />
+              <Route path="/google-maps-itinerary" element={<GoogleMapsItineraryPage />} />
+              <Route path="/recommendations/:tripId" element={<Navigate to="/itinerary/:tripId?tab=map" replace />} />
               <Route path="/booking/:destinationId" element={<Booking />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
+            
+            {/* Public Landing Page (Optional) */}
+            <Route path="/home" element={<Home />} />
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />

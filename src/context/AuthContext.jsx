@@ -70,11 +70,25 @@ export const AuthProvider = ({ children }) => {
         } else {
           setIsAuthenticated(false);
           setUser(null);
-          // Only redirect to login if not on an auth page and not on the home page
+          // Only redirect to login if not on an auth page or public page
           const currentPath = window.location.pathname;
-          const publicPaths = ['/login', '/signup', '/forgot-password', '/auth/forgot-password', '/auth/reset-password', '/'];
-          if (!publicPaths.includes(currentPath)) {
-            navigate('/login', { replace: true });
+          const publicPaths = [
+            '/login', 
+            '/signup', 
+            '/forgot-password', 
+            '/auth/forgot-password', 
+            '/auth/reset-password', 
+            '/',
+            '/itinerary',
+            '/dashboard',
+            '/home'
+          ];
+          // Don't redirect if on public paths or if path starts with /itinerary
+          if (!publicPaths.includes(currentPath) && !currentPath.startsWith('/itinerary') && !currentPath.startsWith('/map') && !currentPath.startsWith('/expenses') && !currentPath.startsWith('/packing') && !currentPath.startsWith('/weather') && !currentPath.startsWith('/documents')) {
+            // Only redirect protected routes like /profile, /settings
+            if (currentPath.startsWith('/profile') || currentPath.startsWith('/settings')) {
+              navigate('/login', { replace: true });
+            }
           }
         }
         setIsLoading(false);

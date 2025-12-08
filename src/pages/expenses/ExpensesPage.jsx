@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useItinerary } from '../../context/ItineraryContext';
-import { estimateExpenses } from '../../services/expenses';
 import { 
   Box, 
   Container, 
@@ -29,7 +28,7 @@ const ExpensesPage = () => {
   const { tripId } = useParams();
   const theme = useTheme();
   const navigate = useNavigate();
-  const { trips, currentTrip, getTripById, updateTrip } = useItinerary();
+  const { getTripById, updateTrip } = useItinerary();
   
   // State management
   const [trip, setTrip] = useState(null);
@@ -44,13 +43,12 @@ const ExpensesPage = () => {
     const loadTrip = async () => {
       try {
         setIsLoading(true);
-        const activeId = tripId || currentTrip?.id;
-        if (!activeId) {
+        if (!tripId) {
           setError('No trip selected');
           return;
         }
-
-        const tripData = getTripById?.(activeId) || trips.find(t => t.id === activeId);
+        
+        const tripData = getTripById?.(tripId);
         if (!tripData) {
           setError('Trip not found');
           return;
@@ -68,7 +66,7 @@ const ExpensesPage = () => {
     };
 
     loadTrip();
-  }, [tripId, currentTrip, trips, getTripById]);
+  }, [tripId, getTripById]);
 
   // Handle save expense
   const handleSaveExpense = (expenseData) => {
@@ -143,7 +141,7 @@ const ExpensesPage = () => {
     );
   }
 
-  if (!tripId && !currentTrip?.id) {
+  if (!tripId) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -209,35 +207,6 @@ const ExpensesPage = () => {
         {/* Summary Section */}
         <Box sx={{ mb: 4 }}>
           <ExpenseSummary expenses={expenses} />
-          {trip && (
-            <Paper sx={{ p: 2, mt: 2 }}>
-              {(() => {
-                const est = estimateExpenses(trip);
-                return (
-                  <div>
-                    <Typography variant="h6" gutterBottom>
-                      Estimated Trip Expenses
-                    </Typography>
-                    <Typography variant="body2">
-                      Total: {new Intl.NumberFormat(undefined, { style: 'currency', currency: est.currency }).format(est.total)}
-                    </Typography>
-                    <Grid container spacing={2} sx={{ mt: 1 }}>
-                      {Object.entries(est.breakdown).map(([k, v]) => (
-                        <Grid item xs={12} sm={6} md={4} key={k}>
-                          <Paper sx={{ p: 1.5 }}>
-                            <Typography variant="body2" color="text.secondary">{k}</Typography>
-                            <Typography>
-                              {new Intl.NumberFormat(undefined, { style: 'currency', currency: est.currency }).format(v)}
-                            </Typography>
-                          </Paper>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </div>
-                );
-              })()}
-            </Paper>
-          )}
         </Box>
 
         <Grid container spacing={3}>

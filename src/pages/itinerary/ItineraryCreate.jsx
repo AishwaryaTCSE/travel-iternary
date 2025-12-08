@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useItinerary } from '../../context/ItineraryContext';
 import { 
   Box, 
@@ -38,7 +38,8 @@ const steps = ['Basic Info', 'Trip Details', 'Review'];
 
 const ItineraryCreate = () => {
   const navigate = useNavigate();
-  const { createTrip } = useItinerary();
+  const { tripId } = useParams();
+  const { createTrip, updateTrip, trips } = useItinerary();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     title: '',
@@ -106,27 +107,39 @@ const ItineraryCreate = () => {
     }));
   };
 
-  const handleSubmit = () => {
-    const payload = {
-      title: formData.title,
-      destination: formData.destination,
-      startDate: formData.startDate?.toISOString?.() || formData.startDate,
-      endDate: formData.endDate?.toISOString?.() || formData.endDate,
-      travelers: formData.travelers,
-      budget: formData.budget ? Number(formData.budget) : undefined,
-      description: formData.description,
-      tripType: formData.tripType,
-      privacy: formData.privacy,
-      status: 'active',
-      createdAt: new Date().toISOString()
-    };
-    const newTrip = createTrip(payload);
-    
-    // Store the trip ID in session storage for the map page to use
-    sessionStorage.setItem('currentTripId', newTrip.id);
-    
-    // Navigate to map page with the new trip ID
-    navigate(`/map?tripId=${newTrip.id}`);
+  const handleSubmit = async () => {
+    try {
+      const tripData = {
+        title: formData.title,
+        destination: formData.destination,
+        startDate: formData.startDate ? formData.startDate.toISOString() : null,
+        endDate: formData.endDate ? formData.endDate.toISOString() : null,
+        travelers: formData.travelers,
+        budget: formData.budget ? parseFloat(formData.budget) : null,
+        description: formData.description,
+        tripType: formData.tripType,
+        privacy: formData.privacy,
+        activities: [],
+        expenses: [],
+        documents: []
+      };
+
+      if (tripId) {
+        // Update existing trip
+        const existingTrip = trips.find(t => t.id === tripId);
+        if (existingTrip) {
+          updateTrip(tripId, tripData);
+          navigate(`/itinerary/${tripId}`);
+        }
+      } else {
+        // Create new trip
+        const newTrip = createTrip(tripData);
+        navigate(`/itinerary/${newTrip.id}`);
+      }
+    } catch (error) {
+      console.error('Error saving trip:', error);
+      alert('Failed to save trip. Please try again.');
+    }
   };
 
   const renderStepContent = (step) => {

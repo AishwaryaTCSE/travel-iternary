@@ -71,8 +71,6 @@ export const ItineraryProvider = ({ children }) => {
     }
   };
 
-  const getTripById = (tripId) => trips.find(t => t.id === tripId);
-
   // Activity CRUD operations
   const addActivity = (tripId, activity) => {
     const newActivity = {
@@ -86,16 +84,76 @@ export const ItineraryProvider = ({ children }) => {
         trip.id === tripId 
           ? { 
               ...trip, 
-              activities: [...trip.activities, newActivity] 
+              activities: [...(trip.activities || []), newActivity] 
             } 
           : trip
       )
     );
+    setCurrentTrip(prev => {
+      if (prev?.id === tripId) {
+        return { ...prev, activities: [...(prev.activities || []), newActivity] };
+      }
+      return prev;
+    });
     return newActivity;
   };
 
-  // Similar update and delete operations for activities
-  // ... (implement updateActivity, deleteActivity)
+  const updateActivity = (tripId, activityId, updates) => {
+    setTrips(prev => 
+      prev.map(trip => 
+        trip.id === tripId 
+          ? { 
+              ...trip, 
+              activities: (trip.activities || []).map(activity =>
+                activity.id === activityId 
+                  ? { ...activity, ...updates, updatedAt: new Date().toISOString() }
+                  : activity
+              )
+            } 
+          : trip
+      )
+    );
+    setCurrentTrip(prev => {
+      if (prev?.id === tripId) {
+        return {
+          ...prev,
+          activities: (prev.activities || []).map(activity =>
+            activity.id === activityId 
+              ? { ...activity, ...updates, updatedAt: new Date().toISOString() }
+              : activity
+          )
+        };
+      }
+      return prev;
+    });
+  };
+
+  const deleteActivity = (tripId, activityId) => {
+    setTrips(prev => 
+      prev.map(trip => 
+        trip.id === tripId 
+          ? { 
+              ...trip, 
+              activities: (trip.activities || []).filter(activity => activity.id !== activityId)
+            } 
+          : trip
+      )
+    );
+    setCurrentTrip(prev => {
+      if (prev?.id === tripId) {
+        return {
+          ...prev,
+          activities: (prev.activities || []).filter(activity => activity.id !== activityId)
+        };
+      }
+      return prev;
+    });
+  };
+
+  // Helper function to get trip by ID
+  const getTripById = (tripId) => {
+    return trips.find(trip => trip.id === tripId) || null;
+  };
 
   return (
     <ItineraryContext.Provider
@@ -107,10 +165,11 @@ export const ItineraryProvider = ({ children }) => {
         createTrip,
         updateTrip,
         deleteTrip,
-        getTripById,
         setCurrentTrip,
         addActivity,
-        // Add other operations here
+        updateActivity,
+        deleteActivity,
+        getTripById,
       }}
     >
       {children}

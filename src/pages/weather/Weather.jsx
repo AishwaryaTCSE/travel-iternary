@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useItinerary } from '../../context/ItineraryContext';
-import { geocodeDestination } from '../../services/maps';
-import { getWeatherByCity, getWeatherByCoords } from '../../services/weather';
 import {
   Box,
   Typography,
@@ -11,6 +8,7 @@ import {
   Grid,
   Card,
   CardContent,
+  Button,
   TextField,
   InputAdornment,
   IconButton,
@@ -20,8 +18,7 @@ import {
   Divider,
   Chip,
   useTheme,
-  Tooltip,
-  Button
+  Tooltip
 } from '@mui/material';
 import { 
   FiSearch, 
@@ -130,8 +127,6 @@ const weatherIcons = {
 
 const Weather = () => {
   const { id } = useParams(); // Itinerary ID
-  const { trips, currentTrip } = useItinerary();
-  const trip = id ? trips.find(t => t.id === id) : currentTrip;
   const theme = useTheme();
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -139,27 +134,23 @@ const Weather = () => {
   const [activeTab, setActiveTab] = useState('today');
   const [unit, setUnit] = useState('f'); // 'f' for Fahrenheit, 'c' for Celsius
   
+  // In a real app, you would fetch weather data from an API
   useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true);
-        const target = searchQuery || trip?.destination || '';
-        let data = null;
-        if (target) {
-          const geo = await geocodeDestination(target);
-          if (geo) {
-            data = await getWeatherByCoords(geo.lat, geo.lng, unit === 'f' ? 'imperial' : 'metric');
-          } else {
-            data = await getWeatherByCity(target, unit === 'f' ? 'imperial' : 'metric');
-          }
-        }
-        setWeatherData(data || sampleWeatherData);
-      } finally {
+    // Simulate API call
+    const fetchWeatherData = () => {
+      setLoading(true);
+      // In a real app, you would make an API call here
+      // For example: fetch(`/api/weather?location=${searchQuery || 'New York'}`)
+      
+      // Simulate API delay
+      setTimeout(() => {
+        setWeatherData(sampleWeatherData);
         setLoading(false);
-      }
+      }, 1000);
     };
-    run();
-  }, [searchQuery, trip, unit]);
+    
+    fetchWeatherData();
+  }, [searchQuery]);
   
   // Handle search
   const handleSearch = (e) => {

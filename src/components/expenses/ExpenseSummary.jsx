@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { FiDollarSign, FiPieChart, FiTrendingUp, FiTrendingDown } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 
