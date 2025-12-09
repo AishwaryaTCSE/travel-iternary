@@ -47,14 +47,10 @@ const Header = () => {
 
   const resolvePath = (item) => {
     const tripId = currentTrip?.id;
-    // Dashboard/Home: main itinerary list page
     if (item.base === 'dashboard') return '/';
-    // Itinerary list
     if (item.base === 'itinerary') return '/itinerary';
-    // Map supports both, prefer trip-specific when available
     if (item.base === 'map') return tripId ? `/map/${tripId}` : '/map';
-    // Features that require a trip; fall back to itinerary list when none selected
-    if (item.requiresTrip) return tripId ? `/${item.base}/${tripId}` : '/itinerary';
+    if (item.requiresTrip) return tripId ? `/${item.base}/${tripId}` : `/${item.base}`;
     return `/${item.base}`;
   };
 

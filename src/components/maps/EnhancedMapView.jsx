@@ -685,7 +685,7 @@ const EnhancedMapView = ({ itinerary }) => {
             <br />
             • VITE_FOURSQUARE_API_KEY (recommended) or VITE_GOOGLE_MAPS_API_KEY
             <br />
-            • VITE_OPENWEATHER_API_KEY or VITE_WEATHER_API_KEY (for weather)
+            • VITE_OPENWEATHER_API_KEY (for weather)
           </Typography>
         </Alert>
       )}
@@ -947,3 +947,4 @@ const EnhancedMapView = ({ itinerary }) => {
 };
 
 export default EnhancedMapView;
+

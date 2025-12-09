@@ -166,6 +166,14 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+const Logout = () => {
+  const { logout } = useAuth();
+  useEffect(() => {
+    logout();
+  }, [logout]);
+  return <LoadingSpinner message="Signing out..." />;
+};
+
 // Main Layout - Wraps routes with header and layout structure
 // Note: Made public to match frontend-only requirement from prompt
 const MainLayout = () => {
@@ -203,7 +211,7 @@ function App() {
   useEffect(() => {
     const FOURSQUARE_API_KEY = import.meta.env.VITE_FOURSQUARE_API_KEY;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || import.meta.env.VITE_WEATHER_API_KEY;
+    const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
     
     // Only show warning in development mode
     if (import.meta.env.DEV) {
@@ -279,8 +287,8 @@ function App() {
             
             {/* Main Routes - Dashboard/Itinerary List as Home */}
             <Route element={<MainLayout />}>
-              {/* Dashboard/Home - Shows itinerary cards */}
-              <Route path="/" element={<ItineraryList />} />
+              {/* Dashboard/Home - Show Home page at base URL */}
+              <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<ItineraryList />} />
               
               {/* Itinerary Routes */}
@@ -298,16 +306,14 @@ function App() {
               </Route>
               
               {/* Feature Routes - Can be accessed directly or via itinerary detail tabs */}
-              <Route path="/expenses">
-                <Route index element={<Navigate to="/itinerary" replace />} />
-                <Route path=":tripId" element={<ExpensesPage />} />
-              </Route>
+              <Route path="/expenses" element={<ExpensesPage />} />
+              <Route path="/expenses/:tripId" element={<ExpensesPage />} />
+              <Route path="/packing" element={<PackingList />} />
               <Route path="/packing/:tripId" element={<PackingList />} />
               <Route path="/map/:tripId" element={<MapView />} />
-              <Route path="/weather">
-                <Route index element={<Navigate to="/itinerary" replace />} />
-                <Route path=":tripId" element={<Weather />} />
-              </Route>
+              <Route path="/weather" element={<Weather />} />
+              <Route path="/weather/:tripId" element={<Weather />} />
+              <Route path="/documents" element={<Documents />} />
               <Route path="/documents/:tripId" element={<Documents />} />
               
               {/* Map Routes - Enhanced map view with recommendations */}
@@ -317,6 +323,7 @@ function App() {
               <Route path="/booking/:destinationId" element={<Booking />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/logout" element={<Logout />} />
             </Route>
             
             {/* Public Landing Page (Optional) */}

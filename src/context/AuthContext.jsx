@@ -10,7 +10,10 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  updateProfile as updateAuthProfile
+  updateProfile as updateAuthProfile,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword as updateAuthPassword
 } from 'firebase/auth';
 import { 
   doc, 
@@ -246,10 +249,32 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setIsAuthenticated(false);
       toast.success('Logged out successfully');
+      try { localStorage.removeItem('isAuthenticated'); } catch {}
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
       toast.error('Failed to log out. Please try again.');
+    }
+  };
+
+  const updatePassword = async (currentPassword, newPassword) => {
+    try {
+      setIsLoading(true);
+      const current = auth.currentUser;
+      if (!current || !current.email) throw new Error('No authenticated user');
+      const credential = EmailAuthProvider.credential(current.email, currentPassword);
+      await reauthenticateWithCredential(current, credential);
+      await updateAuthPassword(current, newPassword);
+      toast.success('Password updated successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('Update password error:', error);
+      const message = error.message || 'Failed to update password';
+      setError(message);
+      toast.error(message);
+      return { success: false, error: message };
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -397,6 +422,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    currentUser: user,
     isAuthenticated,
     isLoading,
     error,
@@ -404,7 +430,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loginWithGoogle,
-    updateProfile
+    updateProfile,
+    updatePassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

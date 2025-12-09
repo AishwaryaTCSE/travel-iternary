@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useItinerary } from '../context/ItineraryContext';
+import { geocodeAddress, searchNearbyPlaces, searchWikipediaText } from '../api/mapsApi';
+import { searchPlaces as searchFsq } from '../api/placesApi';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { 
   FiPlus, FiMapPin, FiCalendar, FiSun, FiPackage, FiStar, FiHeart, 
   FiSearch, FiUsers, FiGlobe, FiAward, FiShield, FiClock, FiDollarSign,
@@ -112,9 +116,16 @@ const generateBlogPosts = (count) => {
 
 const Home = () => {
   const { t } = useTranslation();
+  const { currentTrip, updateTrip, createTrip, addActivity } = useItinerary();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [searchResults, setSearchResults] = useState({ attractions: [], hotels: [], places: [] });
+  const [searchedLocation, setSearchedLocation] = useState(null);
+  const [addedKeys, setAddedKeys] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
   
   const testimonials = generateTestimonials(12);
@@ -254,14 +265,219 @@ const Home = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
-                  Search
+                <button onClick={async () => {
+                  if (!searchQuery.trim()) return;
+                  setSearchLoading(true);
+                  setSearchError('');
+                  let loc = null;
+                  try {
+                    loc = await geocodeAddress(searchQuery.trim());
+                    setSearchedLocation(loc);
+                  } catch {
+                    setSearchedLocation({ address: searchQuery.trim(), lat: null, lng: null });
+                  }
+                  let attractions = [];
+                  let hotels = [];
+                  let places = [];
+                  if (loc?.lat && loc?.lng) {
+                    try { attractions = await searchNearbyPlaces(loc, 10000, 'tourist_attraction'); } catch {}
+                    try { hotels = await searchNearbyPlaces(loc, 10000, 'lodging'); } catch {}
+                    try { places = await searchNearbyPlaces(loc, 10000, 'point_of_interest'); } catch {}
+                    if (hasFoursquare) {
+                      try {
+                        const fsqAttr = await searchFsq(searchQuery.trim(), { lat: loc.lat, lng: loc.lng, radius: 10000, categories: '16000', limit: 10 });
+                        const fsqHotels = await searchFsq(searchQuery.trim(), { lat: loc.lat, lng: loc.lng, radius: 10000, categories: '19014', limit: 10 });
+                        const fsqPlaces = await searchFsq(searchQuery.trim(), { lat: loc.lat, lng: loc.lng, radius: 10000, limit: 10 });
+                        const mapFsq = (arr) => (arr?.results || []).map((r) => ({
+                          name: r.name,
+                          lat: r.geocodes?.main?.latitude,
+                          lng: r.geocodes?.main?.longitude,
+                          address: r.location?.formatted_address,
+                          source: 'fsq',
+                        }));
+                        const aF = mapFsq(fsqAttr);
+                        const hF = mapFsq(fsqHotels);
+                        const pF = mapFsq(fsqPlaces);
+                        attractions = [...aF, ...attractions];
+                        hotels = [...hF, ...hotels];
+                        places = [...pF, ...places];
+                      } catch {}
+                    }
+                  }
+                  if (attractions.length === 0) {
+                    try { attractions = await searchWikipediaText(searchQuery.trim(), 'tourist_attraction', 10); } catch {}
+                  }
+                  if (hotels.length === 0) {
+                    try { hotels = await searchWikipediaText(searchQuery.trim(), 'lodging', 10); } catch {}
+                  }
+                  if (places.length === 0) {
+                    try { places = await searchWikipediaText(searchQuery.trim(), 'point_of_interest', 10); } catch {}
+                  }
+                  setSearchResults({ attractions, hotels, places });
+                  if (loc?.address) {
+                    if (currentTrip) {
+                      updateTrip(currentTrip.id, { destination: loc.address, location: loc.lat && loc.lng ? { lat: loc.lat, lng: loc.lng } : undefined });
+                    } else {
+                      createTrip({ destination: loc.address, location: loc.lat && loc.lng ? { lat: loc.lat, lng: loc.lng } : undefined });
+                    }
+                  }
+                  if (attractions.length === 0 && hotels.length === 0 && places.length === 0) {
+                    setSearchError('Failed to fetch places for the location');
+                  }
+                  setSearchLoading(false);
+                }} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
+                  {searchLoading ? 'Searching...' : 'Search'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {searchedLocation && (
+        <section className="py-12 bg-white dark:bg-gray-800">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold mb-4">Results for {searchedLocation.address}</h2>
+            {searchError && (
+              <div className="text-red-600 mb-4">{searchError}</div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold mb-3">Attractions</h3>
+                {searchResults.attractions.length === 0 ? (
+                  <p className="text-gray-500">No attractions found</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {searchResults.attractions.slice(0, 10).map((p, i) => {
+                      const key = `attraction:${p.name || p.place_id || i}`;
+                      const disabled = !!addedKeys[key];
+                      return (
+                        <li key={i} className="p-2 bg-white dark:bg-gray-700 rounded flex items-center justify-between">
+                          <span>{p.name || p.place_id}</span>
+                          <button
+                            className="text-sm px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-60"
+                            disabled={disabled}
+                            onClick={() => {
+                              const dest = searchedLocation?.address || searchQuery.trim();
+                              try {
+                                const activity = {
+                                  title: p.name || 'Attraction',
+                                  type: 'attraction',
+                                  location: p.lat && p.lng ? { lat: p.lat, lng: p.lng } : undefined,
+                                  notes: `Found near ${dest}`,
+                                };
+                                let tripId = currentTrip?.id;
+                                if (!tripId) {
+                                  const trip = createTrip({ destination: dest });
+                                  tripId = trip.id;
+                                }
+                                addActivity(tripId, activity);
+                                setAddedKeys(prev => ({ ...prev, [key]: true }));
+                                toast.success('Added attraction to itinerary');
+                                navigate(`/itinerary/${tripId}`);
+                              } catch (err) {
+                                toast.error('Failed to add to itinerary');
+                              }
+                            }}
+                          >{disabled ? 'Added' : 'Add'}</button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold mb-3">Hotels</h3>
+                {searchResults.hotels.length === 0 ? (
+                  <p className="text-gray-500">No hotels found</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {searchResults.hotels.slice(0, 10).map((p, i) => {
+                      const key = `lodging:${p.name || p.place_id || i}`;
+                      const disabled = !!addedKeys[key];
+                      return (
+                        <li key={i} className="p-2 bg-white dark:bg-gray-700 rounded flex items-center justify-between">
+                          <span>{p.name || p.place_id}</span>
+                          <button
+                            className="text-sm px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-60"
+                            disabled={disabled}
+                            onClick={() => {
+                              const dest = searchedLocation?.address || searchQuery.trim();
+                              try {
+                                const activity = {
+                                  title: p.name || 'Hotel',
+                                  type: 'lodging',
+                                  location: p.lat && p.lng ? { lat: p.lat, lng: p.lng } : undefined,
+                                  notes: `Found near ${dest}`,
+                                };
+                                let tripId = currentTrip?.id;
+                                if (!tripId) {
+                                  const trip = createTrip({ destination: dest });
+                                  tripId = trip.id;
+                                }
+                                addActivity(tripId, activity);
+                                setAddedKeys(prev => ({ ...prev, [key]: true }));
+                                toast.success('Added hotel to itinerary');
+                                navigate(`/itinerary/${tripId}`);
+                              } catch (err) {
+                                toast.error('Failed to add to itinerary');
+                              }
+                            }}
+                          >{disabled ? 'Added' : 'Add'}</button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold mb-3">Famous Places</h3>
+                {searchResults.places.length === 0 ? (
+                  <p className="text-gray-500">No places found</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {searchResults.places.slice(0, 10).map((p, i) => {
+                      const key = `poi:${p.name || p.place_id || i}`;
+                      const disabled = !!addedKeys[key];
+                      return (
+                        <li key={i} className="p-2 bg-white dark:bg-gray-700 rounded flex items-center justify-between">
+                          <span>{p.name || p.place_id}</span>
+                          <button
+                            className="text-sm px-3 py-1 bg-blue-600 text-white rounded disabled:opacity-60"
+                            disabled={disabled}
+                            onClick={() => {
+                              const dest = searchedLocation?.address || searchQuery.trim();
+                              try {
+                                const activity = {
+                                  title: p.name || 'Place',
+                                  type: 'poi',
+                                  location: p.lat && p.lng ? { lat: p.lat, lng: p.lng } : undefined,
+                                  notes: `Found near ${dest}`,
+                                };
+                                let tripId = currentTrip?.id;
+                                if (!tripId) {
+                                  const trip = createTrip({ destination: dest });
+                                  tripId = trip.id;
+                                }
+                                addActivity(tripId, activity);
+                                setAddedKeys(prev => ({ ...prev, [key]: true }));
+                                toast.success('Added place to itinerary');
+                                navigate(`/itinerary/${tripId}`);
+                              } catch (err) {
+                                toast.error('Failed to add to itinerary');
+                              }
+                            }}
+                          >{disabled ? 'Added' : 'Add'}</button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="py-16 bg-white dark:bg-gray-800">
@@ -559,3 +775,5 @@ const Home = () => {
 };
 
 export default Home;
+  const hasFoursquare = !!import.meta.env.VITE_FOURSQUARE_API_KEY;
+  const hasGoogle = !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY;

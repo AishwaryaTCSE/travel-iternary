@@ -31,22 +31,7 @@ export const geocodeAddress = async (address) => {
         const { lat, lng } = results[0].geometry.location;
         return { lat, lng, address: results[0].formatted_address };
       }
-      // Fallback to Mapbox if Google returns no results and Mapbox token is available
-      if (MAPBOX_ACCESS_TOKEN) {
-        const fallback = await axios.get(
-          `${MAPBOX_BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`,
-          {
-            params: { types: 'address,place,locality,neighborhood,region', limit: 1, access_token: MAPBOX_ACCESS_TOKEN },
-          }
-        );
-        const { features } = fallback.data;
-        if (features && features.length > 0) {
-          const [lng, lat] = features[0].center;
-          return { lat, lng, address: features[0].place_name };
-        }
-      }
     } else {
-      // Mapbox geocoding
       response = await mapsClient.get(`/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`, {
         params: {
           types: 'address,place,locality,neighborhood,region',
@@ -60,28 +45,18 @@ export const geocodeAddress = async (address) => {
         return { lat, lng, address: features[0].place_name };
       }
     }
-    
+    const nominatim = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: { q: address, format: 'json', limit: 1 },
+    });
+    const item = Array.isArray(nominatim.data) ? nominatim.data[0] : null;
+    if (item) {
+      const lat = parseFloat(item.lat);
+      const lng = parseFloat(item.lon);
+      return { lat, lng, address: item.display_name };
+    }
     throw new Error('No results found for the given address');
   } catch (error) {
     console.error('Error geocoding address:', error);
-    // Try Mapbox as a final fallback when Google fails and token exists
-    if (useGoogleMaps && MAPBOX_ACCESS_TOKEN) {
-      try {
-        const fallback = await axios.get(
-          `${MAPBOX_BASE_URL}/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json`,
-          {
-            params: { types: 'address,place,locality,neighborhood,region', limit: 1, access_token: MAPBOX_ACCESS_TOKEN },
-          }
-        );
-        const { features } = fallback.data;
-        if (features && features.length > 0) {
-          const [lng, lat] = features[0].center;
-          return { lat, lng, address: features[0].place_name };
-        }
-      } catch (_) {
-        // Ignore and rethrow original error
-      }
-    }
     throw error;
   }
 };
@@ -140,6 +115,27 @@ export const getStaticMapUrl = (center, zoom = 12, size = '600x400', markers = [
   }
 };
 
+export const searchWikipediaText = async (query, type = 'point_of_interest', limit = 10) => {
+  const term =
+    type === 'lodging'
+      ? `hotels in ${query}`
+      : type === 'tourist_attraction'
+      ? `tourist attractions in ${query}`
+      : `famous places in ${query}`;
+  const resp = await axios.get('https://en.wikipedia.org/w/api.php', {
+    params: {
+      action: 'query',
+      list: 'search',
+      srsearch: term,
+      srlimit: limit,
+      format: 'json',
+      origin: '*',
+    },
+  });
+  const items = resp.data?.query?.search || [];
+  return items.map((it) => ({ name: it.title }));
+};
+
 export const searchNearbyPlaces = async (location, radius = 1000, type) => {
   try {
     if (useGoogleMaps) {
@@ -152,9 +148,34 @@ const response = await mapsClient.get('/place/nearbysearch/json', {
       });
       return response.data.results || [];
     } else {
-      // For Mapbox, we'll use the Foursquare integration for place search
-      console.warn('Mapbox native nearby search not implemented. Use Foursquare API instead.');
-      return [];
+      const filter =
+        type === 'lodging'
+          ? '[tourism=hotel]'
+          : type === 'point_of_interest'
+          ? '[tourism]'
+          : '[tourism=attraction]';
+      const query = `[out:json];node(around:${radius},${location.lat},${location.lng})${filter};out;`;
+      const overpass = await axios.get('https://overpass-api.de/api/interpreter', {
+        params: { data: query },
+      });
+      const elements = overpass.data?.elements || [];
+      const results = elements
+        .filter((e) => e.tags && e.tags.name)
+        .map((e) => ({ name: e.tags.name, lat: e.lat, lng: e.lon, tags: e.tags }));
+      if (results.length > 0) return results;
+      const wiki = await axios.get('https://en.wikipedia.org/w/api.php', {
+        params: {
+          action: 'query',
+          list: 'geosearch',
+          gscoord: `${location.lat}|${location.lng}`,
+          gsradius: radius,
+          gslimit: 10,
+          format: 'json',
+          origin: '*',
+        },
+      });
+      const geosearch = wiki.data?.query?.geosearch || [];
+      return geosearch.map((it) => ({ name: it.title, lat: it.lat, lng: it.lon }));
     }
   } catch (error) {
     console.error('Error searching nearby places:', error);
@@ -168,6 +189,7 @@ const mapsApi = {
   getDirections,
   getStaticMapUrl,
   searchNearbyPlaces,
+  searchWikipediaText,
   // Export the axios instance in case it's needed
   client: mapsClient
 };

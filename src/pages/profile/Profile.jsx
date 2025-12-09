@@ -29,7 +29,7 @@ import {
 } from 'react-icons/fi';
 
 const Profile = () => {
-  const { currentUser, updateProfile, updatePassword } = useAuth();
+  const { user, updateProfile, updatePassword, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isPasswordEditing, setIsPasswordEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,15 +54,15 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    if (currentUser) {
+    if (user) {
       setFormData({
-        displayName: currentUser.displayName || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
-        address: currentUser.address || ''
+        displayName: user.displayName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || ''
       });
     }
-  }, [currentUser]);
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -133,8 +133,8 @@ const Profile = () => {
     }
   };
 
-  if (!currentUser) {
-    navigate('/auth/login');
+  if (!isAuthenticated) {
+    navigate('/login');
     return null;
   }
 
